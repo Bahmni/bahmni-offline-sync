@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import static java.util.Arrays.asList;
 
-public class ConceptServiceInterceptor implements Advisor {
+public class ConceptServiceInterceptor implements MethodInterceptor {
     public static final String CONCEPT_NAME_URL = "/openmrs/ws/rest/v1/concept/%s?s=byFullySpecifiedName&v=bahmni&name=%s";
 
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
@@ -58,68 +58,53 @@ public class ConceptServiceInterceptor implements Advisor {
         List<PlatformTransactionManager> platformTransactionManagers = Context.getRegisteredComponents(PlatformTransactionManager.class);
         return platformTransactionManagers.get(0);
     }
-
-    @Override
-    public Advice getAdvice() {
-        return new ConceptAroundAdvice();
-    }
-
-    @Override
-    public boolean isPerInstance() {
-        return false;
-    }
-
-
-    private class ConceptAroundAdvice implements MethodInterceptor {
-        public Object invoke(MethodInvocation invocation) throws Throwable {
-            final List<Event> events = new ArrayList<Event>();
-            Object[] arguments = invocation.getArguments();
-            List<ConceptSet> newlyAddedSetMembers = new ArrayList<ConceptSet>();
-            if (operations().contains(invocation.getMethod().getName())) {
-                Concept concept = (Concept) arguments[0];
-                if (concept.getName().getName().equals("Offline Concepts")) {
-                    for (ConceptSet setMember : concept.getConceptSets()) {
-                        if (setMember.getConceptSetId() == null) {
-                            newlyAddedSetMembers.add(setMember);
-                        }
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        final List<Event> events = new ArrayList<Event>();
+        Object[] arguments = invocation.getArguments();
+        List<ConceptSet> newlyAddedSetMembers = new ArrayList<ConceptSet>();
+        if (operations().contains(invocation.getMethod().getName())) {
+            Concept concept = (Concept) arguments[0];
+            if (concept.getName(Context.getLocale()).getName().equals("Offline Concepts")) {
+                for (ConceptSet setMember : concept.getConceptSets()) {
+                    if (setMember.getConceptSetId() == null) {
+                        newlyAddedSetMembers.add(setMember);
                     }
                 }
             }
-
-            Object o = invocation.proceed();
-
-            if (operations().contains(invocation.getMethod().getName())) {
-                Concept concept = (Concept) arguments[0];
-                for (ConceptSet setmember : newlyAddedSetMembers) {
-                    if (setmember.getConceptSetId() != null) {
-                        String url = String.format(CONCEPT_NAME_URL, setmember.getConcept().getUuid(), setmember.getConcept().getName().getName().replaceAll(" ", "+"));
-                        events.add(new Event(UUID.randomUUID().toString(), "Offline Concepts", DateTime.now(), url, url, "offline-concepts"));
-
-                    }
-                }
-
-                String url = String.format(CONCEPT_NAME_URL, concept.getUuid(), concept.getName().getName().replaceAll(" ", "+"));
-                events.add(new Event(UUID.randomUUID().toString(), "concepts", DateTime.now(), url, url, "all-concepts"));
-
-                atomFeedSpringTransactionManager.executeWithTransaction(
-                        new AFTransactionWorkWithoutResult() {
-                            @Override
-                            protected void doInTransaction() {
-                                for (Event event : events) {
-                                    eventService.notify(event);
-                                }
-                            }
-
-                            @Override
-                            public PropagationDefinition getTxPropagationDefinition() {
-                                return PropagationDefinition.PROPAGATION_REQUIRED;
-                            }
-                        }
-                );
-
-            }
-
-            return o;
         }
+
+        Object o = invocation.proceed();
+
+        if (operations().contains(invocation.getMethod().getName())) {
+            Concept concept = (Concept) arguments[0];
+            for (ConceptSet setmember : newlyAddedSetMembers) {
+                if (setmember.getConceptSetId() != null) {
+                    String url = String.format(CONCEPT_NAME_URL, setmember.getConcept().getUuid(), setmember.getConcept().getName(Context.getLocale()).getName().replaceAll(" ", "+"));
+                    events.add(new Event(UUID.randomUUID().toString(), "Offline Concepts", DateTime.now(), url, url, "offline-concepts"));
+                }
+            }
+
+            String url = String.format(CONCEPT_NAME_URL, concept.getUuid(), concept.getName(Context.getLocale()).getName().replaceAll(" ", "+"));
+            events.add(new Event(UUID.randomUUID().toString(), "concepts", DateTime.now(), url, url, "all-concepts"));
+
+            atomFeedSpringTransactionManager.executeWithTransaction(
+                    new AFTransactionWorkWithoutResult() {
+                        @Override
+                        protected void doInTransaction() {
+                            for (Event event : events) {
+                                eventService.notify(event);
+                            }
+                        }
+
+                        @Override
+                        public PropagationDefinition getTxPropagationDefinition() {
+                            return PropagationDefinition.PROPAGATION_REQUIRED;
+                        }
+                    }
+            );
+
+        }
+
+        return o;
     }
 }

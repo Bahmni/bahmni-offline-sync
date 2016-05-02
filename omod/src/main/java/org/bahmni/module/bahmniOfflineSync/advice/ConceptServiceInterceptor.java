@@ -61,7 +61,7 @@ public class ConceptServiceInterceptor implements Advisor {
 
     @Override
     public Advice getAdvice() {
-        return new PrintingAroundAdvice();
+        return new ConceptAroundAdvice();
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ConceptServiceInterceptor implements Advisor {
     }
 
 
-    private class PrintingAroundAdvice implements MethodInterceptor {
+    private class ConceptAroundAdvice implements MethodInterceptor {
         public Object invoke(MethodInvocation invocation) throws Throwable {
             final List<Event> events = new ArrayList<Event>();
             Object[] arguments = invocation.getArguments();
@@ -78,9 +78,9 @@ public class ConceptServiceInterceptor implements Advisor {
             if (operations().contains(invocation.getMethod().getName())) {
                 Concept concept = (Concept) arguments[0];
                 if (concept.getName().getName().equals("Offline Concepts")) {
-                    for (ConceptSet setmember : concept.getConceptSets()) {
-                        if (setmember.getConceptSetId() == null) {
-                            newlyAddedSetMembers.add(setmember);
+                    for (ConceptSet setMember : concept.getConceptSets()) {
+                        if (setMember.getConceptSetId() == null) {
+                            newlyAddedSetMembers.add(setMember);
                         }
                     }
                 }
@@ -89,27 +89,34 @@ public class ConceptServiceInterceptor implements Advisor {
             Object o = invocation.proceed();
 
             if (operations().contains(invocation.getMethod().getName())) {
+                Concept concept = (Concept) arguments[0];
                 for (ConceptSet setmember : newlyAddedSetMembers) {
                     if (setmember.getConceptSetId() != null) {
                         String url = String.format(CONCEPT_NAME_URL, setmember.getConcept().getUuid(), setmember.getConcept().getName().getName().replaceAll(" ", "+"));
                         events.add(new Event(UUID.randomUUID().toString(), "Offline Concepts", DateTime.now(), url, url, "offline-concepts"));
-                        atomFeedSpringTransactionManager.executeWithTransaction(
-                                new AFTransactionWorkWithoutResult() {
-                                    @Override
-                                    protected void doInTransaction() {
-                                        for (Event event : events) {
-                                            eventService.notify(event);
-                                        }
-                                    }
 
-                                    @Override
-                                    public PropagationDefinition getTxPropagationDefinition() {
-                                        return PropagationDefinition.PROPAGATION_REQUIRED;
-                                    }
-                                }
-                        );
                     }
                 }
+
+                String url = String.format(CONCEPT_NAME_URL, concept.getUuid(), concept.getName().getName().replaceAll(" ", "+"));
+                events.add(new Event(UUID.randomUUID().toString(), "concepts", DateTime.now(), url, url, "all-concepts"));
+
+                atomFeedSpringTransactionManager.executeWithTransaction(
+                        new AFTransactionWorkWithoutResult() {
+                            @Override
+                            protected void doInTransaction() {
+                                for (Event event : events) {
+                                    eventService.notify(event);
+                                }
+                            }
+
+                            @Override
+                            public PropagationDefinition getTxPropagationDefinition() {
+                                return PropagationDefinition.PROPAGATION_REQUIRED;
+                            }
+                        }
+                );
+
             }
 
             return o;

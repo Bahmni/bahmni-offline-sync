@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>emrapi-api</artifactId>
-			<version>1.14-SNAPSHOT</version>
+			<version>1.13-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 

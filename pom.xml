@@ -178,13 +178,4 @@
 		</pluginRepository>
 	</pluginRepositories>
 
-	<distributionManagement>
-		<snapshotRepository>
-			<id>bahmni-artifactory</id>
-			<name>bahmni-artifactory-snapshots</name>
-			<url>http://bahmnirepo.thoughtworks.com/artifactory/libs-snapshot-local</url>
-		</snapshotRepository>
-	</distributionManagement>
-
-
 </project>

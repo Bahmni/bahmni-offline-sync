@@ -50,5 +50,11 @@
 	</messages>
 	<!-- /Internationalization -->
 
+	<globalProperty>
+		<property>bahmni.visitMatcher</property>
+		<defaultValue>org.bahmni.module.bahmniOfflineSync.OfflineVisitMatcher</defaultValue>
+		<description>visit matcher for offline</description>
+	</globalProperty>
+
 </module>
 

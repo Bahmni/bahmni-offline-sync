@@ -13,6 +13,10 @@
 	<name>Bahmni Offline Sync Module OMOD</name>
 	<description>OMOD project for BahmniOfflineSync</description>
 
+	<properties>
+		<addressHierarchyVersion>2.8</addressHierarchyVersion>
+	</properties>
+
 	<dependencies>
 
 		<!-- 
@@ -84,7 +88,43 @@
 			<artifactId>openmrs-atomfeed-common</artifactId>
 			<version>${openmrsAtomfeedVersion}</version>
 		</dependency>
-		
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>webservices.rest-omod-common</artifactId>
+            <version>2.12</version>
+        </dependency>
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<version>2.0.0-alpha</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>addresshierarchy-api</artifactId>
+			<version>${addressHierarchyVersion}</version>
+			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>addresshierarchy-omod</artifactId>
+			<version>${addressHierarchyVersion}</version>
+			<type>jar</type>
+			<scope>provided</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>4.3.0.RC1</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>4.3.0.RC1</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- End OpenMRS core -->
 
 	</dependencies>

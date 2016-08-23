@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EventLogFilterEvaluatorFactory {
-    private String bahmniEventLogFilterEvaluator = "BahmniEventLogFilterEvaluator";
+    private String bahmniEventLogFilterEvaluator = "bahmniOfflineSync.eventlog.filterEvaluator";
     @Autowired
     @Qualifier("adminService")
     private AdministrationService administrationService;

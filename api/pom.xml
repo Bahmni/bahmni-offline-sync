@@ -61,18 +61,6 @@
 			<scope>test</scope>
 		</dependency>
 
-        <dependency>
-            <groupId>org.bahmni.module</groupId>
-            <artifactId>bahmni-emr-api</artifactId>
-            <version>0.81-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>emrapi-api</artifactId>
-			<version>1.16-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
 
 		<!-- End OpenMRS core -->
 		

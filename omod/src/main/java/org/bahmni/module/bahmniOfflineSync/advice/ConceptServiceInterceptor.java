@@ -1,6 +1,5 @@
 package org.bahmni.module.bahmniOfflineSync.advice;
 
-import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.ict4h.atomfeed.server.repository.AllEventRecordsQueue;
@@ -14,7 +13,6 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptSet;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
-import org.springframework.aop.Advisor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
@@ -50,7 +48,7 @@ public class ConceptServiceInterceptor implements MethodInterceptor {
     }
 
     private List<String> operations() {
-        return asList("saveConcept", "updateConcept", "retireConcept", "purgeConcept");
+        return asList("saveConcept", "retireConcept", "purgeConcept");
     }
 
 

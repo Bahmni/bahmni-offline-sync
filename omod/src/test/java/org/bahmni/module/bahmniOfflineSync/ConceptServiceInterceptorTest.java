@@ -75,23 +75,6 @@ public class ConceptServiceInterceptorTest {
     }
 
     @Test
-    public void shouldPublishUpdateEventToFeedAfterUpdateConceptOperation() throws Throwable {
-        when(methodInvocation.getMethod()).thenReturn(ConceptService.class.getMethod("updateConcept", Concept.class));
-
-        publishedFeed.invoke(methodInvocation);
-        verify(atomFeedSpringTransactionManager).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-    }
-
-    @Test
-    public void shouldPublishUpdateEventToFeedAfterEveryUpdateConceptOperation() throws Throwable {
-        when(methodInvocation.getMethod()).thenReturn(ConceptService.class.getMethod("updateConcept", Concept.class));
-        int updates = 2;
-        for (int i = 0; i < updates; i++) {
-            publishedFeed.invoke(methodInvocation);
-        }
-        verify(atomFeedSpringTransactionManager, times(updates)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-    }
-    @Test
     public void shouldPublishUpdateEventToFeedAfterSaveConceptOperation() throws Throwable {
         when(methodInvocation.getMethod()).thenReturn(ConceptService.class.getMethod("saveConcept", Concept.class));
 

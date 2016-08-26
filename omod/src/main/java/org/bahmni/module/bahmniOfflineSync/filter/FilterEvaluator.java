@@ -6,7 +6,7 @@ import java.util.Map;
 
 public interface FilterEvaluator {
    public String evaluateFilter(String uuid, String category);
-   public Map<String,String> getFilterForDevice(String provider, String location);
+   public Map<String,List<String>> getFilterForDevice(String provider, String addressUuid, String loginLocationUuid);
    public List<String> getEventCategoriesList();
 
 }

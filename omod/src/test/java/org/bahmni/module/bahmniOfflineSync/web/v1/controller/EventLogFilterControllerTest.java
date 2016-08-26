@@ -8,12 +8,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.openmrs.Encounter;
-import org.openmrs.Patient;
-import org.openmrs.PersonAttribute;
-import org.openmrs.PersonAttributeType;
+import org.openmrs.*;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
@@ -46,6 +44,8 @@ public class EventLogFilterControllerTest {
     private EncounterService encounterService;
     @Mock
     private AddressHierarchyService addressHierarchyService;
+    @Mock
+    private LocationService locationService;
 
     private LocationBasedFilterEvaluator locationFilterEvaluator;
 
@@ -59,6 +59,7 @@ public class EventLogFilterControllerTest {
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getPatientService()).thenReturn(patientService);
         Mockito.when(Context.getEncounterService()).thenReturn(encounterService);
+        Mockito.when(Context.getLocationService()).thenReturn(locationService);
         locationFilterEvaluator = new LocationBasedFilterEvaluator();
         patient = new Patient();
         patient.setUuid("patientUuid");
@@ -119,14 +120,18 @@ public class EventLogFilterControllerTest {
         addressHierarchyEntry.setParent(parentAddressHierarchyEntry);
         addressHierarchyEntry.setUserGeneratedId("202020");
         when(addressHierarchyService.getAddressHierarchyEntryByUuid(anyString())).thenReturn(addressHierarchyEntry);
+        when(locationService.getLocationByUuid(anyString())).thenReturn(new org.openmrs.Location());
+        when(locationService.getLocationAttributeTypeByName(anyString())).thenReturn(new LocationAttributeType());
 
-        Map<String,String> markers =  controller.getFilterForDevice("providerUuid","locationUuid");
+        Map<String,List<String>> markers =  controller.getFilterForDevice("providerUuid","addressUuid","locationUuid");
         Map categoryFilterMap = new HashMap();
-        categoryFilterMap.put("TransactionalData", "202020");
-        categoryFilterMap.put("AddressHierarchy","202020");
-        categoryFilterMap.put("ParentAddressHierarchy", null);
-        categoryFilterMap.put("offline-concepts", null);
-        assertEquals(markers,categoryFilterMap);
+        ArrayList<String> filters = new ArrayList<String>();
+        filters.add("202020");
+        categoryFilterMap.put("TransactionalData", filters);
+        categoryFilterMap.put("AddressHierarchy",filters);
+        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        assertEquals(categoryFilterMap,markers);
 
     }
 

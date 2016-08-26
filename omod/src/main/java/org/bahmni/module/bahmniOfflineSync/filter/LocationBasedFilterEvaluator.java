@@ -1,13 +1,13 @@
 package org.bahmni.module.bahmniOfflineSync.filter;
 
-import org.openmrs.Encounter;
-import org.openmrs.Patient;
+import org.openmrs.*;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
-
+import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +16,7 @@ import java.util.Map;
 public class LocationBasedFilterEvaluator implements FilterEvaluator {
 
     private static final String ATTRIBUTE_TYPE_NAME = "addressCode";
+    private LocationService locationService;
 
     private PatientService patientService;
 
@@ -24,6 +25,7 @@ public class LocationBasedFilterEvaluator implements FilterEvaluator {
     public LocationBasedFilterEvaluator() {
         this.patientService = Context.getPatientService();
         this.encounterService = Context.getEncounterService();
+        this.locationService = Context.getLocationService();
     }
 
     private String evaluateFilterForPatient(String uuid) {
@@ -55,22 +57,54 @@ public class LocationBasedFilterEvaluator implements FilterEvaluator {
         return addressHierarchyFilter;
     }
 
-    @Override
-    public Map<String, String> getFilterForDevice(String providerUuid, String locationUuid) {
-        Map<String, String> categoryFilterMap = new HashMap();
+
+    public Map<String, List<String>> getFilterForDevice(String providerUuid, String addressUuid, String loginLocationUuid) {
+        Map<String, List<String>> categoryFilterMap = new HashMap();
         AddressHierarchyService addressHierarchyService = Context.getService(AddressHierarchyService.class);
-        AddressHierarchyEntry addressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntryByUuid(locationUuid);
-        String userGeneratedId = null;
-
-        if (addressHierarchyEntry != null)
-            userGeneratedId = addressHierarchyEntry.getUserGeneratedId();
-
-        categoryFilterMap.put("TransactionalData", userGeneratedId);
-        categoryFilterMap.put("AddressHierarchy", getCatchmentNumberForAddressHierarchy(addressHierarchyEntry));
-        categoryFilterMap.put("ParentAddressHierarchy", null);
-        categoryFilterMap.put("offline-concepts", null);
-
+        AddressHierarchyEntry addressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntryByUuid(addressUuid);
+        List transactionalDataFilters = getTransactionalDataFilters(loginLocationUuid, addressHierarchyService, addressHierarchyEntry);
+        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
+        categoryFilterMap.put("AddressHierarchy", getFiltersForAddressHierarchy(addressHierarchyEntry));
+        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         return categoryFilterMap;
+    }
+
+    private List getTransactionalDataFilters(String loginLocationUuid, AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
+        List transactionalDataFilters = new ArrayList();
+        if (addressHierarchyEntry != null) {
+            LocationAttributeType wardListAttribute = locationService.getLocationAttributeTypeByName("wardList");
+            String userGeneratedId = addressHierarchyEntry.getUserGeneratedId();
+            LocationAttribute wardList = getWardList(loginLocationUuid, wardListAttribute);
+            List<AddressHierarchyEntry> childAddressHierarchyEntries = addressHierarchyService.getChildAddressHierarchyEntries(addressHierarchyEntry);
+            List<String> transactionalFilters = getWardIds(wardList, childAddressHierarchyEntries);
+            transactionalDataFilters.add(userGeneratedId);
+            transactionalDataFilters.addAll(transactionalFilters);
+        }
+        return transactionalDataFilters;
+    }
+
+    private LocationAttribute getWardList(String loginLocationUuid, LocationAttributeType wardListAttribute) {
+        Location location = locationService.getLocationByUuid(loginLocationUuid);
+        List<LocationAttribute> attributes = (List<LocationAttribute>) location.getActiveAttributes();
+        for (LocationAttribute attribute : attributes) {
+            if (attribute.getAttributeType().equals(wardListAttribute)) {
+                return attribute;
+            }
+        }
+        return null;
+    }
+
+    private List<String> getWardIds(LocationAttribute wardList, List<AddressHierarchyEntry> childAddressHierarchyEntries) {
+        List<String> wardIDs = new ArrayList();
+        if (wardList != null) {
+            wardIDs.addAll(StringUtils.commaDelimitedListToSet(wardList.getValue().toString()));
+        } else {
+            for (AddressHierarchyEntry childAddressHierarchyEntry : childAddressHierarchyEntries) {
+                wardIDs.add(childAddressHierarchyEntry.getUserGeneratedId());
+            }
+        }
+        return wardIDs;
     }
 
     @Override
@@ -85,18 +119,16 @@ public class LocationBasedFilterEvaluator implements FilterEvaluator {
         return eventCategoryList;
     }
 
-    private String getCatchmentNumberForAddressHierarchy(AddressHierarchyEntry addressHierarchyEntry) {
-        String filterForAddressHierarchy = null;
-
-        while (addressHierarchyEntry.getParent() != null) {
-            if (addressHierarchyEntry.getUserGeneratedId().length() == 6) {
-                filterForAddressHierarchy = addressHierarchyEntry.getUserGeneratedId();
+    private List<String> getFiltersForAddressHierarchy(AddressHierarchyEntry addressHierarchyEntry){
+        List addressHierarchyFilters = new ArrayList();
+        while(addressHierarchyEntry.getParent()!=null) {
+            if(addressHierarchyEntry.getUserGeneratedId().length() == 6){
+                addressHierarchyFilters.add(addressHierarchyEntry.getUserGeneratedId());
                 break;
             }
             addressHierarchyEntry = addressHierarchyEntry.getParent();
         }
-
-        return filterForAddressHierarchy;
+        return addressHierarchyFilters;
     }
 
     @Override

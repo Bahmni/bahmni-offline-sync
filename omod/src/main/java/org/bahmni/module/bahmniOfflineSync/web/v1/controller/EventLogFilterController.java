@@ -36,19 +36,19 @@ public class EventLogFilterController extends BaseRestController {
             return filterEvaluator.evaluateFilter(uuid,category);
         }
         else
-            throw new RuntimeException("Global Property BahmniEventLogFilterEvaluator is not configured in OpenMRS. Configure classpath for FilterEvaluator");
+            throw new RuntimeException("Global Property bahmniOfflineSync.eventlog.filterEvaluator is not configured in OpenMRS. Configure classpath for FilterEvaluator");
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/markers/{providerUuid}/{locationUuid}", produces={ "application/json"})
+    @RequestMapping(method = RequestMethod.GET, value = "/markers/{providerUuid}/{addressUuid}/{loginLocationUuid}", produces={ "application/json"})
     @ResponseBody
-    public Map<String, String> getFilterForDevice(@PathVariable("providerUuid") String providerUuid,@PathVariable("locationUuid") String locationUuid ) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+    public Map<String, List<String>> getFilterForDevice(@PathVariable("providerUuid") String providerUuid,@PathVariable("addressUuid") String addressUuid, @PathVariable("loginLocationUuid") String loginLocationUuid) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         filterEvaluator = eventLogFilterEvaluatorFactory.getFilterEvaluatorFromGlobalProperties();
         if(filterEvaluator!=null) {
-            return filterEvaluator.getFilterForDevice(providerUuid, locationUuid);
+            return filterEvaluator.getFilterForDevice(providerUuid, addressUuid, loginLocationUuid);
         }
         else
-            throw new RuntimeException("Global Property BahmniEventLogFilterEvaluator is not configured in OpenMRS. Configure classpath for FilterEvaluator");
+            throw new RuntimeException("Global Property bahmniOfflineSync.eventlog.filterEvaluator is not configured in OpenMRS. Configure classpath for FilterEvaluator");
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/category")
@@ -59,7 +59,7 @@ public class EventLogFilterController extends BaseRestController {
             return filterEvaluator.getEventCategoriesList();
         }
         else
-            throw new RuntimeException("Global Property BahmniEventLogFilterEvaluator is not configured in OpenMRS. Configure classpath for FilterEvaluator");
+            throw new RuntimeException("Global Property bahmniOfflineSync.eventlog.filterEvaluator is not configured in OpenMRS. Configure classpath for FilterEvaluator");
     }
 
 

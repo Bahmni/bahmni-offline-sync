@@ -3,14 +3,11 @@ package org.bahmni.module.bahmniOfflineSync.filter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.openmrs.Encounter;
-import org.openmrs.Patient;
-import org.openmrs.PersonAttribute;
-import org.openmrs.PersonAttributeType;
+import org.openmrs.*;
 import org.openmrs.api.EncounterService;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
@@ -22,7 +19,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -39,6 +36,8 @@ public class LocationBasedFilterEvaluatorTest {
     private EncounterService encounterService;
     @Mock
     private AddressHierarchyService addressHierarchyService;
+    @Mock
+    private LocationService locationService;
     private AddressHierarchyEntry addressHierarchyEntry;
     private Patient patient;
     Encounter encounter;
@@ -51,6 +50,7 @@ public class LocationBasedFilterEvaluatorTest {
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getPatientService()).thenReturn(patientService);
         Mockito.when(Context.getEncounterService()).thenReturn(encounterService);
+        Mockito.when(Context.getLocationService()).thenReturn(locationService);
         locationBasedFilterEvaluator = new LocationBasedFilterEvaluator();
         patient = new Patient();
         patient.setUuid(patientUuid);
@@ -197,22 +197,90 @@ public class LocationBasedFilterEvaluatorTest {
     }
 
     @Test
-    public void shouldGetFilterForDevice() throws Exception {
+    public void shouldGetFilterForDeviceAsAllChildAddressWhenWardListIsNotDefined() throws Exception {
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
         AddressHierarchyEntry addressHierarchyEntry = new AddressHierarchyEntry();
+
         AddressHierarchyEntry parentAddressHierarchyEntry = new AddressHierarchyEntry();
         addressHierarchyEntry.setParent(parentAddressHierarchyEntry);
         addressHierarchyEntry.setUserGeneratedId("202020");
+
+        List<AddressHierarchyEntry> childAddressHierarchyEntries = new ArrayList<AddressHierarchyEntry>();
+        AddressHierarchyEntry childAddressHierarchyEntry1 = new AddressHierarchyEntry();
+        AddressHierarchyEntry childAddressHierarchyEntry2 = new AddressHierarchyEntry();
+        childAddressHierarchyEntries.add(childAddressHierarchyEntry1);
+        childAddressHierarchyEntries.add(childAddressHierarchyEntry2);
+        childAddressHierarchyEntry1.setParent(addressHierarchyEntry);
+        childAddressHierarchyEntry2.setParent(addressHierarchyEntry);
+        childAddressHierarchyEntry1.setUserGeneratedId("20202001");
+        childAddressHierarchyEntry2.setUserGeneratedId("20202002");
+
         when(addressHierarchyService.getAddressHierarchyEntryByUuid(anyString())).thenReturn(addressHierarchyEntry);
+        when(locationService.getLocationByUuid(anyString())).thenReturn(new org.openmrs.Location());
+        when(locationService.getLocationAttributeTypeByName(anyString())).thenReturn(new LocationAttributeType());
+        when(addressHierarchyService.getChildAddressHierarchyEntries(any(AddressHierarchyEntry.class))).thenReturn(childAddressHierarchyEntries);
 
-        Map<String,String> markers =  locationBasedFilterEvaluator.getFilterForDevice("providerUuid","locationUuid");
+        Map<String,List<String>> markers =  locationBasedFilterEvaluator.getFilterForDevice("providerUuid","addressUuid","locationUuid");
         Map categoryFilterMap = new HashMap();
-        categoryFilterMap.put("TransactionalData", "202020");
-        categoryFilterMap.put("AddressHierarchy","202020");
-        categoryFilterMap.put("ParentAddressHierarchy", null);
-        categoryFilterMap.put("offline-concepts", null);
-        assertEquals(markers,categoryFilterMap);
+        ArrayList<String> transactionalDataFilters = new ArrayList<String>();
+        transactionalDataFilters.add("202020");
+        transactionalDataFilters.add("20202001");
+        transactionalDataFilters.add("20202002");
+        ArrayList<String> addressHierarchyFilters = new ArrayList<String>();
+        addressHierarchyFilters.add("202020");
+        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
+        categoryFilterMap.put("AddressHierarchy",addressHierarchyFilters);
+        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        assertEquals(categoryFilterMap,markers);
+    }
 
+
+    @Test
+    public void shouldGetFilterForDeviceAsOnlyConfiguredFiltersWhenWardListIsDefined() throws Exception {
+        PowerMockito.mockStatic(Context.class);
+        Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
+
+        AddressHierarchyEntry addressHierarchyEntry = new AddressHierarchyEntry();
+        AddressHierarchyEntry parentAddressHierarchyEntry = new AddressHierarchyEntry();
+        Location loginLocation = new Location();
+        LocationAttribute locationAttribute = new LocationAttribute();
+        LocationAttributeType locationAttributeType = new LocationAttributeType();
+
+        addressHierarchyEntry.setParent(parentAddressHierarchyEntry);
+        addressHierarchyEntry.setUserGeneratedId("202020");
+        locationAttribute.setVoided(Boolean.FALSE);
+        locationAttribute.setAttributeType(locationAttributeType);
+        locationAttribute.setValue("20202002");
+        loginLocation.setAttribute(locationAttribute);
+
+        List<AddressHierarchyEntry> childAddressHierarchyEntries = new ArrayList<AddressHierarchyEntry>();
+        AddressHierarchyEntry childAddressHierarchyEntry1 = new AddressHierarchyEntry();
+        AddressHierarchyEntry childAddressHierarchyEntry2 = new AddressHierarchyEntry();
+        childAddressHierarchyEntries.add(childAddressHierarchyEntry1);
+        childAddressHierarchyEntries.add(childAddressHierarchyEntry2);
+        childAddressHierarchyEntry1.setParent(addressHierarchyEntry);
+        childAddressHierarchyEntry2.setParent(addressHierarchyEntry);
+        childAddressHierarchyEntry1.setUserGeneratedId("20202001");
+        childAddressHierarchyEntry2.setUserGeneratedId("20202002");
+
+        when(addressHierarchyService.getAddressHierarchyEntryByUuid(anyString())).thenReturn(addressHierarchyEntry);
+        when(locationService.getLocationByUuid(anyString())).thenReturn(loginLocation);
+        when(locationService.getLocationAttributeTypeByName(anyString())).thenReturn(locationAttributeType);
+        when(addressHierarchyService.getChildAddressHierarchyEntries(any(AddressHierarchyEntry.class))).thenReturn(childAddressHierarchyEntries);
+
+        Map<String, List<String>> markers = locationBasedFilterEvaluator.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
+        Map categoryFilterMap = new HashMap();
+        ArrayList<String> transactionalDataFilters = new ArrayList<String>();
+        transactionalDataFilters.add("202020");
+        transactionalDataFilters.add("20202002");
+        ArrayList<String> addressHierarchyFilters = new ArrayList<String>();
+        addressHierarchyFilters.add("202020");
+        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
+        categoryFilterMap.put("AddressHierarchy", addressHierarchyFilters);
+        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        assertEquals(categoryFilterMap, markers);
     }
 }

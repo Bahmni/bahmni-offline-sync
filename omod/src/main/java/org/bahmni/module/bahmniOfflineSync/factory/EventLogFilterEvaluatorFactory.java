@@ -24,7 +24,7 @@ public class EventLogFilterEvaluatorFactory {
                 return (FilterEvaluator) Context.loadClass(filterEvaluatorClassName).newInstance();
         }
         else
-            log.error("Global Property BahmniEventLogFilterEvaluator is not configured in OpenMRS. Configure classpath for FilterEvaluator");
+            log.error("Global Property " + bahmniEventLogFilterEvaluator + " is not configured in OpenMRS. Configure classpath for FilterEvaluator");
         return null;
     }
 }

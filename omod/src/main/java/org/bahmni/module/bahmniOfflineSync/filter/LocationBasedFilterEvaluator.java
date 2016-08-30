@@ -8,10 +8,8 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 import org.springframework.util.StringUtils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 public class LocationBasedFilterEvaluator implements FilterEvaluator {
 
@@ -73,38 +71,52 @@ public class LocationBasedFilterEvaluator implements FilterEvaluator {
     private List getTransactionalDataFilters(String loginLocationUuid, AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
         List transactionalDataFilters = new ArrayList();
         if (addressHierarchyEntry != null) {
-            LocationAttributeType wardListAttribute = locationService.getLocationAttributeTypeByName("wardList");
+            LocationAttributeType catchmentFiltersAttribute = locationService.getLocationAttributeTypeByName("catchmentFilters");
             String userGeneratedId = addressHierarchyEntry.getUserGeneratedId();
-            LocationAttribute wardList = getWardList(loginLocationUuid, wardListAttribute);
+            LocationAttribute catchmentFilters = getCatchmentFilters(loginLocationUuid, catchmentFiltersAttribute);
             List<AddressHierarchyEntry> childAddressHierarchyEntries = addressHierarchyService.getChildAddressHierarchyEntries(addressHierarchyEntry);
-            List<String> transactionalFilters = getWardIds(wardList, childAddressHierarchyEntries);
+            List<String> transactionalFilters = getCatchmentIds(catchmentFilters, childAddressHierarchyEntries, addressHierarchyService, addressHierarchyEntry);
             transactionalDataFilters.add(userGeneratedId);
             transactionalDataFilters.addAll(transactionalFilters);
         }
         return transactionalDataFilters;
     }
 
-    private LocationAttribute getWardList(String loginLocationUuid, LocationAttributeType wardListAttribute) {
+    private LocationAttribute getCatchmentFilters(String loginLocationUuid, LocationAttributeType catchmentFiltersAttribute) {
         Location location = locationService.getLocationByUuid(loginLocationUuid);
         List<LocationAttribute> attributes = (List<LocationAttribute>) location.getActiveAttributes();
         for (LocationAttribute attribute : attributes) {
-            if (attribute.getAttributeType().equals(wardListAttribute)) {
+            if (attribute.getAttributeType().equals(catchmentFiltersAttribute)) {
                 return attribute;
             }
         }
         return null;
     }
 
-    private List<String> getWardIds(LocationAttribute wardList, List<AddressHierarchyEntry> childAddressHierarchyEntries) {
+    private List<String> getCatchmentIds(LocationAttribute catchmentFilters, List<AddressHierarchyEntry> childAddressHierarchyEntries, AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
         List<String> wardIDs = new ArrayList();
-        if (wardList != null) {
-            wardIDs.addAll(StringUtils.commaDelimitedListToSet(wardList.getValue().toString()));
+        if (catchmentFilters != null) {
+            String wardsName = trim(catchmentFilters.getValue().toString());
+            Set<String> wardsNameList = StringUtils.commaDelimitedListToSet(wardsName);
+            for (String wardName : wardsNameList) {
+                AddressHierarchyEntry childAddressHierarchyEntry = addressHierarchyService.getChildAddressHierarchyEntryByName(addressHierarchyEntry, wardName);
+                if (childAddressHierarchyEntry == null) {
+                    throw new RuntimeException("Please check your catchmentFilters configuration in openmrs!!");
+                } else {
+                    wardIDs.add(childAddressHierarchyEntry.getUserGeneratedId());
+                }
+            }
         } else {
             for (AddressHierarchyEntry childAddressHierarchyEntry : childAddressHierarchyEntries) {
                 wardIDs.add(childAddressHierarchyEntry.getUserGeneratedId());
             }
         }
         return wardIDs;
+    }
+
+    private String trim(String content) {
+        content = content.trim();
+        return content.replaceAll("(,\\s*)",",");
     }
 
     @Override

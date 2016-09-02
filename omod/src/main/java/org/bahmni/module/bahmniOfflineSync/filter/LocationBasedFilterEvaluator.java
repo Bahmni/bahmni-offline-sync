@@ -103,20 +103,33 @@ public class LocationBasedFilterEvaluator implements FilterEvaluator {
                 if (childAddressHierarchyEntry == null) {
                     throw new RuntimeException("Please check your catchmentFilters configuration in openmrs!!");
                 } else {
-                    wardIDs.add(childAddressHierarchyEntry.getUserGeneratedId());
+                    getAllWardIds(childAddressHierarchyEntry, addressHierarchyService, wardIDs);
                 }
             }
         } else {
-            for (AddressHierarchyEntry childAddressHierarchyEntry : childAddressHierarchyEntries) {
-                wardIDs.add(childAddressHierarchyEntry.getUserGeneratedId());
-            }
+            updateWardIds(addressHierarchyService, wardIDs, childAddressHierarchyEntries);
         }
         return wardIDs;
     }
 
+    private void getAllWardIds(AddressHierarchyEntry addressHierarchyEntry, AddressHierarchyService addressHierarchyService, List<String> wardIDs) {
+        if (addressHierarchyEntry == null) {
+            return;
+        }
+        wardIDs.add(addressHierarchyEntry.getUserGeneratedId());
+        List<AddressHierarchyEntry> childAddressHierarchyEntries = addressHierarchyService.getChildAddressHierarchyEntries(addressHierarchyEntry);
+        updateWardIds(addressHierarchyService, wardIDs, childAddressHierarchyEntries);
+    }
+
+    private void updateWardIds(AddressHierarchyService addressHierarchyService, List<String> wardIDs, List<AddressHierarchyEntry> childAddressHierarchyEntries) {
+        for (AddressHierarchyEntry childAddressHierarchyEntry : childAddressHierarchyEntries) {
+            getAllWardIds(childAddressHierarchyEntry, addressHierarchyService, wardIDs);
+        }
+    }
+
     private String trim(String content) {
         content = content.trim();
-        return content.replaceAll("(,\\s*)",",");
+        return content.replaceAll("(\\s*,\\s*)", ",");
     }
 
     @Override
@@ -131,10 +144,10 @@ public class LocationBasedFilterEvaluator implements FilterEvaluator {
         return eventCategoryList;
     }
 
-    private List<String> getFiltersForAddressHierarchy(AddressHierarchyEntry addressHierarchyEntry){
+    private List<String> getFiltersForAddressHierarchy(AddressHierarchyEntry addressHierarchyEntry) {
         List addressHierarchyFilters = new ArrayList();
-        while(addressHierarchyEntry.getParent()!=null) {
-            if(addressHierarchyEntry.getUserGeneratedId().length() == 6){
+        while (addressHierarchyEntry.getParent() != null) {
+            if (addressHierarchyEntry.getUserGeneratedId().length() == 6) {
                 addressHierarchyFilters.add(addressHierarchyEntry.getUserGeneratedId());
                 break;
             }

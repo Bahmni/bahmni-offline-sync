@@ -15,6 +15,7 @@
 	<require_version>${openMRSVersion}</require_version>
 
 	<require_modules>
+		<require_module>org.openmrs.module.webservices.rest</require_module>
 		<require_module>org.ict4h.openmrs.openmrs-atomfeed</require_module>
 		<require_module>org.openmrs.module.addresshierarchy</require_module>
 	</require_modules>

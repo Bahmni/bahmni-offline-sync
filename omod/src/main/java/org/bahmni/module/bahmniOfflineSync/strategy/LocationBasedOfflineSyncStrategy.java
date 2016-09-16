@@ -1,6 +1,9 @@
-package org.bahmni.module.bahmniOfflineSync.filter;
+package org.bahmni.module.bahmniOfflineSync.strategy;
 
+import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
+import org.ict4h.atomfeed.server.domain.EventRecord;
 import org.openmrs.*;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
@@ -10,20 +13,25 @@ import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class LocationBasedFilterEvaluator implements FilterEvaluator {
-
+public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
     private static final String ATTRIBUTE_TYPE_NAME = "addressCode";
+
     private LocationService locationService;
 
     private PatientService patientService;
 
     private EncounterService encounterService;
 
-    public LocationBasedFilterEvaluator() {
+    private ConceptService conceptService;
+
+    public LocationBasedOfflineSyncStrategy() {
         this.patientService = Context.getPatientService();
         this.encounterService = Context.getEncounterService();
         this.locationService = Context.getLocationService();
+        this.conceptService = Context.getConceptService();
     }
 
     private String evaluateFilterForPatient(String uuid) {
@@ -157,16 +165,51 @@ public class LocationBasedFilterEvaluator implements FilterEvaluator {
     }
 
     @Override
-    public String evaluateFilter(String uuid, String category) {
-        String filter = "";
+    public List<EventLog> getEventLogsFromEventRecords(List<EventRecord> eventRecords) {
+        List<EventLog> eventLogs = new ArrayList<EventLog>();
 
-        if (category.equalsIgnoreCase("Patient"))
-            filter = evaluateFilterForPatient(uuid);
-        else if (category.equalsIgnoreCase("Encounter") || category.equalsIgnoreCase("SHREncounter"))
-            filter = evaluateFilterForEncounter(uuid);
-        else if (category.equalsIgnoreCase("AddressHierarchy"))
-            filter = evaluateFilterForAddressHierarchy(uuid);
+        for (EventRecord er : eventRecords) {
+            EventLog eventLog = new EventLog(er.getUuid(),er.getCategory(),er.getTimeStamp(),er.getContents(),null);
+            String category = er.getCategory();
+            String uuid = getUuidFromURL(er.getContents());
+            String filter = "";
 
-        return filter;
+            if (!uuid.isEmpty()) {
+                if (category.equalsIgnoreCase("all-concepts")) {
+                    if (isOfflineConceptEvent(uuid)) {
+                        eventLog.setCategory("offline-concepts");
+                    } else {
+                        eventLog.setCategory("concepts");
+                    }
+                }
+
+                if (category.equalsIgnoreCase("Patient"))
+                    filter = evaluateFilterForPatient(uuid);
+                else if (category.equalsIgnoreCase("Encounter") || category.equalsIgnoreCase("SHREncounter"))
+                    filter = evaluateFilterForEncounter(uuid);
+                else if (category.equalsIgnoreCase("AddressHierarchy"))
+                    filter = evaluateFilterForAddressHierarchy(uuid);
+            }
+            eventLog.setFilter(filter);
+
+            eventLogs.add(eventLog);
+        }
+
+        return eventLogs;
+    }
+
+    private String getUuidFromURL(String url){
+        String uuid = "";
+        Pattern uuidPattern = Pattern.compile("([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
+        Matcher matcher = uuidPattern.matcher(url);
+        if (matcher.find())
+          uuid = matcher.group(0);
+        return uuid;
+    }
+
+    private boolean isOfflineConceptEvent(String eventUuid) {
+        final Concept concept = conceptService.getConceptByUuid(eventUuid);
+        final Concept offlineConcept = conceptService.getConceptByName("Offline Concepts");
+        return offlineConcept != null && offlineConcept.getSetMembers().contains(concept);
     }
 }

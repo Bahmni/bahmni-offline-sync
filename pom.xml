@@ -9,7 +9,7 @@
 	<name>Bahmni Offline Sync Module</name>
 	<description>Workarounds for offline sync until concept attributes is developed. This module will then become obselete.</description>
 	<url>https://wiki.openmrs.org/display/docs/Bahmni+Offline+Sync+Module+Module</url>
-	
+
 	<developers>
 		<developer>
 			<name>abisheka</name>
@@ -18,7 +18,7 @@
 			<name>sourava</name>
 		</developer>
 	</developers>
-	
+
 	<organization>
 		<name>OpenMRS</name>
 		<url>http://openmrs.org</url>
@@ -34,18 +34,21 @@
 		<module>api</module>
 		<module>omod</module>
 	</modules>
-	
+
 	<properties>
-		<openMRSVersion>1.11.6</openMRSVersion>
+		<openMRSVersion>1.12.0</openMRSVersion>
 		<atomfeed.version>1.9.1</atomfeed.version>
 		<openmrsAtomfeedVersion>2.5.1</openmrsAtomfeedVersion>
+		<serializationXstreamModuleVersion>0.2.7</serializationXstreamModuleVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<addressHierarchyVersion>2.8</addressHierarchyVersion>
+        <springVersion>3.2.7.RELEASE</springVersion>
+		<openMRSWebServicesVersion>2.14</openMRSWebServicesVersion>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
-		
+
 			<!--
 			Libraries to add as dependencies with compile or runtime scope:
 			Find matching dependencies in the maven central repository.
@@ -56,11 +59,11 @@
 				<scope>compile</scope>
 			</dependency>
 			-->
-			
-			
+
+
 
 			<!-- Begin OpenMRS core -->
-			
+
 			<dependency>
 				<groupId>org.openmrs.api</groupId>
 				<artifactId>openmrs-api</artifactId>
@@ -81,7 +84,7 @@
 				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
-						
+
 			<dependency>
 				<groupId>org.openmrs.api</groupId>
 				<artifactId>openmrs-api</artifactId>
@@ -89,7 +92,7 @@
 				<type>test-jar</type>
 				<scope>test</scope>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.openmrs.web</groupId>
 				<artifactId>openmrs-web</artifactId>
@@ -97,12 +100,11 @@
 				<type>test-jar</type>
 				<scope>test</scope>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.openmrs.test</groupId>
 				<artifactId>openmrs-test</artifactId>
 				<version>${openMRSVersion}</version>
-				<type>pom</type>
 				<scope>test</scope>
 			</dependency>
 
@@ -121,12 +123,53 @@
 				<scope>provided</scope>
 			</dependency>
 
+            <!-- test dependencies -->
+            <!--<dependency>-->
+                <!--<groupId>org.openmrs.module</groupId>-->
+                <!--<artifactId>reporting-api</artifactId>-->
+                <!--<version>${reportingModuleVersion}</version>-->
+                <!--<scope>test</scope>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>org.openmrs.module</groupId>-->
+                <!--<artifactId>calculation-api</artifactId>-->
+                <!--<version>${calculationModuleVersion}</version>-->
+                <!--<scope>test</scope>-->
+            <!--</dependency>-->
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>serialization.xstream-api</artifactId>
+                <version>${serializationXstreamModuleVersion}</version>
+                <scope>test</scope>
+            </dependency>
+
+
 			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-context-support</artifactId>
-				<version>4.2.5</version>
+				<groupId>org.bahmni.test</groupId>
+				<artifactId>bahmni-test-commons</artifactId>
+				<version>0.85-SNAPSHOT</version>
+				<scope>test</scope>
 			</dependency>
-			<!-- End OpenMRS core -->
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod</artifactId>
+				<version>${openMRSWebServicesVersion}</version>
+				<type>jar</type>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.openmrs.module</groupId>
+						<artifactId>webservices.rest-omod-2.0</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-common</artifactId>
+				<version>${openMRSWebServicesVersion}</version>
+				<type>jar</type>
+				<scope>provided</scope>
+			</dependency>
 
 		</dependencies>
 	</dependencyManagement>

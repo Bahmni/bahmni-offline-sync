@@ -1,7 +1,9 @@
 package org.bahmni.module.bahmniOfflineSync.web.v1.controller;
 
-import org.bahmni.module.bahmniOfflineSync.factory.EventLogFilterEvaluatorFactory;
-import org.bahmni.module.bahmniOfflineSync.filter.LocationBasedFilterEvaluator;
+import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
+import org.bahmni.module.bahmniOfflineSync.strategy.*;
+import org.bahmni.module.bahmniOfflineSync.utils.EventRecordServiceHelper;
+import org.ict4h.atomfeed.server.domain.EventRecord;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +30,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.when;
-@PrepareForTest(Context.class)
+
+@PrepareForTest({Context.class})
 @RunWith(PowerMockRunner.class)
 public class EventLogFilterControllerTest {
 
@@ -37,7 +40,7 @@ public class EventLogFilterControllerTest {
     @Mock
     private AdministrationService administrationService;
     @Mock
-    private EventLogFilterEvaluatorFactory eventLogFilterFactory;
+    private SyncStrategyLoader syncStrategyLoader;
     @Mock
     private PatientService patientService;
     @Mock
@@ -47,72 +50,87 @@ public class EventLogFilterControllerTest {
     @Mock
     private LocationService locationService;
 
-    private LocationBasedFilterEvaluator locationFilterEvaluator;
+    @Mock
+    EventRecordServiceHelper eventRecordServiceHelper;
+
+    private EventRecord eventRecord;
+    private LocationBasedOfflineSyncStrategy locationBasedOfflineSyncStrategy;
 
     AddressHierarchyEntry addressHierarchyEntry;
     Patient patient;
     Encounter encounter;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         initMocks(this);
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getPatientService()).thenReturn(patientService);
         Mockito.when(Context.getEncounterService()).thenReturn(encounterService);
         Mockito.when(Context.getLocationService()).thenReturn(locationService);
-        locationFilterEvaluator = new LocationBasedFilterEvaluator();
+        locationBasedOfflineSyncStrategy = new LocationBasedOfflineSyncStrategy();
         patient = new Patient();
         patient.setUuid("patientUuid");
         encounter = new Encounter();
         encounter.setPatient(patient);
         encounter.setUuid("encounterUuid");
-        PersonAttributeType pat= new PersonAttributeType();
+        PersonAttributeType pat = new PersonAttributeType();
         pat.setName("addressCode");
-        PersonAttribute pa = new PersonAttribute(pat,"202020");
-        Set personAttributes =  new HashSet();
+        PersonAttribute pa = new PersonAttribute(pat, "202020");
+        Set personAttributes = new HashSet();
         personAttributes.add(pa);
         patient.setAttributes(personAttributes);
         addressHierarchyEntry = new AddressHierarchyEntry();
         AddressHierarchyEntry parentAddressHierarchyEntry = new AddressHierarchyEntry();
         addressHierarchyEntry.setParent(parentAddressHierarchyEntry);
         addressHierarchyEntry.setUserGeneratedId("202020");
-
+        eventRecord = new EventRecord("eventUuid", "p1", "", "/openmrs/patient/9449ee4b-456d-44a1-b865-2be8158e29d2", new Date(), "Patient");
 
     }
 
     @Test
     public void shouldGetFilterForPatient() throws Exception {
-        when(eventLogFilterFactory.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationFilterEvaluator);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
+        when(eventRecordServiceHelper.getEventRecordsAfterUuid("lastReadUuid")).thenReturn(Collections.singletonList(eventRecord));
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
-        String filter = controller.getFilter("patientUuid","Patient");
-        assertEquals("202020",filter);
+        List<EventLog> eventLogs = controller.getEventLogsAfter("lastReadUuid");
+        assertEquals(eventLogs.size(), 1);
+        assertEquals(eventLogs.get(0).getUuid(), eventRecord.getUuid());
+        assertEquals("202020", eventLogs.get(0).getFilter());
     }
 
     @Test
     public void shouldGetFilterForEncounter() throws Exception {
-        when(eventLogFilterFactory.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationFilterEvaluator);
+        eventRecord = new EventRecord("eventUuid", "p1", "", "/openmrs/encounter/9449ee4b-456d-44a1-b865-2be8158e29d2", new Date(), "Encounter");
+        when(eventRecordServiceHelper.getEventRecordsAfterUuid("lastReadUuid")).thenReturn(Collections.singletonList(eventRecord));
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
         when(encounterService.getEncounterByUuid(anyString())).thenReturn(encounter);
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
-        String filter = controller.getFilter("encounterUuid","Encounter");
-        assertEquals("202020",filter);
+        List<EventLog> eventLogs = controller.getEventLogsAfter("lastReadUuid");
+        assertEquals(eventLogs.size(), 1);
+        assertEquals(eventLogs.get(0).getUuid(), eventRecord.getUuid());
+        assertEquals("202020", eventLogs.get(0).getFilter());
     }
 
     @Test
     public void shouldGetFilterForAddressHierarchy() throws Exception {
+        eventRecord = new EventRecord("eventUuid", "p1", "", "/openmrs/addresshierarchy/9449ee4b-456d-44a1-b865-2be8158e29d2", new Date(), "AddressHierarchy");
+        when(eventRecordServiceHelper.getEventRecordsAfterUuid("lastReadUuid")).thenReturn(Collections.singletonList(eventRecord));
         AddressHierarchyLevel ahl = new AddressHierarchyLevel();
         ahl.setLevelId(6);
         addressHierarchyEntry.setLevel(ahl);
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
-        when(eventLogFilterFactory.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationFilterEvaluator);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
         when(addressHierarchyService.getAddressHierarchyEntryByUuid(anyString())).thenReturn(addressHierarchyEntry);
-        String filter = controller.getFilter("addressHierarchyUuid","AddressHierarchy");
-        assertEquals("202020",filter);
+        List<EventLog> eventLogs = controller.getEventLogsAfter("lastReadUuid");
+        assertEquals(eventLogs.size(), 1);
+        assertEquals(eventLogs.get(0).getUuid(), eventRecord.getUuid());
+        assertEquals("202020", eventLogs.get(0).getFilter());
     }
 
     @Test
     public void shouldGetFilterForDevice() throws Exception {
-        when(eventLogFilterFactory.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationFilterEvaluator);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
         AddressHierarchyEntry addressHierarchyEntry = new AddressHierarchyEntry();
@@ -123,28 +141,28 @@ public class EventLogFilterControllerTest {
         when(locationService.getLocationByUuid(anyString())).thenReturn(new org.openmrs.Location());
         when(locationService.getLocationAttributeTypeByName(anyString())).thenReturn(new LocationAttributeType());
 
-        Map<String,List<String>> markers =  controller.getFilterForDevice("providerUuid","addressUuid","locationUuid");
+        Map<String, List<String>> markers = controller.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
         Map categoryFilterMap = new HashMap();
         ArrayList<String> filters = new ArrayList<String>();
         filters.add("202020");
         categoryFilterMap.put("TransactionalData", filters);
-        categoryFilterMap.put("AddressHierarchy",filters);
+        categoryFilterMap.put("AddressHierarchy", filters);
         categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
-        assertEquals(categoryFilterMap,markers);
+        assertEquals(categoryFilterMap, markers);
 
     }
 
     @Test
     public void shouldGetCategoryList() throws Exception {
-        when(eventLogFilterFactory.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationFilterEvaluator);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
 
         List<String> categories = controller.getCategoryList();
         assertTrue(categories.contains("TransactionalData"));
         assertTrue(categories.contains("AddressHierarchy"));
         assertTrue(categories.contains("ParentAddressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
-        assertTrue(categories.size()==4);
+        assertTrue(categories.size() == 4);
     }
 
 

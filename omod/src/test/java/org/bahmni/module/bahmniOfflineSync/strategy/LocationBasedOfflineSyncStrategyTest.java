@@ -1,5 +1,7 @@
-package org.bahmni.module.bahmniOfflineSync.filter;
+package org.bahmni.module.bahmniOfflineSync.strategy;
 
+import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
+import org.ict4h.atomfeed.server.domain.EventRecord;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,8 +32,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 @PrepareForTest(Context.class)
 @RunWith(PowerMockRunner.class)
-public class LocationBasedFilterEvaluatorTest {
-    private LocationBasedFilterEvaluator locationBasedFilterEvaluator;
+public class LocationBasedOfflineSyncStrategyTest {
+    private LocationBasedOfflineSyncStrategy locationBasedOfflineSyncStrategy;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -47,9 +49,9 @@ public class LocationBasedFilterEvaluatorTest {
     private AddressHierarchyEntry addressHierarchyEntry;
     private Patient patient;
     Encounter encounter;
-    private String encounterUuid = "encounterUuid";
-    private String patientUuid = "patientUuid";
-    private String addressUuid = "addressUuid";
+    private String encounterUuid = "ff17adba-9750-462e-be29-e35091af93df";
+    private String patientUuid = "ff17adba-9750-462e-be29-e35091af93dd";
+    private String addressUuid = "ff17adba-4870-462e-be29-e35091af93de";
 
     @Before
     public void setUp() throws Exception {
@@ -58,7 +60,7 @@ public class LocationBasedFilterEvaluatorTest {
         Mockito.when(Context.getPatientService()).thenReturn(patientService);
         Mockito.when(Context.getEncounterService()).thenReturn(encounterService);
         Mockito.when(Context.getLocationService()).thenReturn(locationService);
-        locationBasedFilterEvaluator = new LocationBasedFilterEvaluator();
+        locationBasedOfflineSyncStrategy = new LocationBasedOfflineSyncStrategy();
         patient = new Patient();
         patient.setUuid(patientUuid);
         encounter = new Encounter();
@@ -87,9 +89,14 @@ public class LocationBasedFilterEvaluatorTest {
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
 
         when(addressHierarchyService.getAddressHierarchyEntryByUuid(addressUuid)).thenReturn(addressHierarchyEntry);
-
-        assertEquals("", locationBasedFilterEvaluator.evaluateFilter(addressUuid, "addressHierarchy"));
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","address","","url/" + addressUuid,new Date(),"addressHierarchy");
+        eventRecords.add(er);
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals("", eventLogs.get(0).getFilter());
         verify(addressHierarchyService, times(1)).getAddressHierarchyEntryByUuid(addressUuid);
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
     }
 
     @Test
@@ -101,11 +108,15 @@ public class LocationBasedFilterEvaluatorTest {
         addressHierarchyEntry.setLevel(ahl);
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","address","","url/"+ addressUuid,new Date(),"addressHierarchy");
+        eventRecords.add(er);
 
-        when(addressHierarchyService.getAddressHierarchyEntryByUuid("addressUuid")).thenReturn(addressHierarchyEntry);
-        String filter = locationBasedFilterEvaluator.evaluateFilter("addressUuid", "addressHierarchy");
-        verify(addressHierarchyService, times(1)).getAddressHierarchyEntryByUuid("addressUuid");
-        assertEquals(addressHierarchyEntry.getUserGeneratedId(), filter);
+        when(addressHierarchyService.getAddressHierarchyEntryByUuid(addressUuid)).thenReturn(addressHierarchyEntry);
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        verify(addressHierarchyService, times(1)).getAddressHierarchyEntryByUuid(addressUuid);
+        assertEquals(addressHierarchyEntry.getUserGeneratedId(), eventLogs.get(0).getFilter());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
     }
 
     @Test
@@ -115,82 +126,113 @@ public class LocationBasedFilterEvaluatorTest {
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
 
-        when(addressHierarchyService.getAddressHierarchyEntryByUuid("addressUuid")).thenReturn(addressHierarchyEntry);
-        assertEquals("", locationBasedFilterEvaluator.evaluateFilter("addressUuid", "addressHierarchy"));
-        verify(addressHierarchyService, times(1)).getAddressHierarchyEntryByUuid("addressUuid");
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","address","","url/"+ addressUuid,new Date(),"addressHierarchy");
+        eventRecords.add(er);
+
+        when(addressHierarchyService.getAddressHierarchyEntryByUuid(addressUuid)).thenReturn(addressHierarchyEntry);
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        verify(addressHierarchyService, times(1)).getAddressHierarchyEntryByUuid(addressUuid);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
     }
 
     @Test
     public void shouldNotSetFilterIfUuidIsNull() throws Exception {
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
-        assertEquals("", locationBasedFilterEvaluator.evaluateFilter(null, "addressHierarchy"));
-        verify(addressHierarchyService, times(0)).getAddressHierarchyEntryByUuid("addressUuid");
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","address","","url/",new Date(),"addressHierarchy");
+        eventRecords.add(er);
+
+        when(addressHierarchyService.getAddressHierarchyEntryByUuid(null)).thenReturn(null);
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        verify(addressHierarchyService, times(0)).getAddressHierarchyEntryByUuid(addressUuid);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
     }
 
 
     @Test
     public void shouldEvaluateFilterForEncounter() {
-
         when(encounterService.getEncounterByUuid(encounterUuid)).thenReturn(encounter);
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
-
-
-        String filter = locationBasedFilterEvaluator.evaluateFilter(encounterUuid, "Encounter");
-
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","Encounter","","url/" + encounterUuid,new Date(),"Encounter");
+        eventRecords.add(er);
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(encounterService, times(1)).getEncounterByUuid(encounterUuid);
-        assertEquals("202020", filter);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals("202020", eventLogs.get(0).getFilter());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
     }
 
     @Test
     public void shouldReturnEmptyFilterIfEncounterUuidIsNull() throws Exception {
         PersonAttribute personAttribute = new PersonAttribute();
         personAttribute.setValue("Value");
-        String filter = locationBasedFilterEvaluator.evaluateFilter(null, "Encounter");
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","Encounter","","url/" + encounterUuid,new Date(),"Encounter");
+        eventRecords.add(er);
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        verify(encounterService, times(1)).getEncounterByUuid(encounterUuid);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
 
         verify(patientService, never()).getPatientByUuid(patientUuid);
-        assertEquals("", filter);
     }
 
     @Test
-    public void shouldRetrunEmptyStringIfEncountersPatientAttributeIsNotAvailable() throws Exception {
+    public void shouldReturnEmptyStringIfEncountersPatientAttributeIsNotAvailable() throws Exception {
         Patient patient = new Patient();
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
         when(encounterService.getEncounterByUuid(encounterUuid)).thenReturn(encounter);
         encounter.setPatient(patient);
-
-        String filter = locationBasedFilterEvaluator.evaluateFilter(encounterUuid, "Encounter");
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","Encounter","","url/" + encounterUuid, new Date(),"Encounter");
+        eventRecords.add(er);
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        verify(encounterService, times(1)).getEncounterByUuid(encounterUuid);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
 
         verify(patientService, times(1)).getPatientByUuid(anyString());
-        assertEquals("", filter);
     }
 
     @Test
     public void shouldEvaluateFilterForPatient() {
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er = new EventRecord("uuid", "Patient", "", "url/" + patientUuid, new Date(), "Patient");
+        eventRecords.add(er);
         when(patientService.getPatientByUuid(patientUuid)).thenReturn(patient);
-        String filter = locationBasedFilterEvaluator.evaluateFilter(patientUuid, "patient");
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(patientService, times(1)).getPatientByUuid(patientUuid);
-        assertEquals("202020", filter);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
+        assertEquals("202020", eventLogs.get(0).getFilter());
     }
 
-    @Test
-    public void shouldReturnEmptyStringIfUuidIsNull() throws Exception {
-        String filter = locationBasedFilterEvaluator.evaluateFilter(null, "patient");
-        assertEquals("", filter);
-    }
 
     @Test
     public void shouldReturnEmptyStringIfAttributeIsNotAvailable() throws Exception {
         when(patientService.getPatientByUuid(anyString())).thenReturn(new Patient());
-        String filter = locationBasedFilterEvaluator.evaluateFilter(patientUuid, "patient");
-
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","patient","","url/" + patientUuid,new Date(),"Patient");
+        eventRecords.add(er);
+        List<EventLog> eventLogs = locationBasedOfflineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(patientService, times(1)).getPatientByUuid(patientUuid);
-        assertEquals("", filter);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
+        assertEquals("", eventLogs.get(0).getFilter());
     }
 
     @Test
     public void shouldGetCategoryList() throws Exception {
-        List<String> categories = locationBasedFilterEvaluator.getEventCategoriesList();
+        List<String> categories = locationBasedOfflineSyncStrategy.getEventCategoriesList();
         assertTrue(categories.contains("TransactionalData"));
         assertTrue(categories.contains("AddressHierarchy"));
         assertTrue(categories.contains("ParentAddressHierarchy"));
@@ -225,7 +267,7 @@ public class LocationBasedFilterEvaluatorTest {
         when(addressHierarchyService.getChildAddressHierarchyEntries(Matchers.same(childAddressHierarchyEntry2))).thenReturn(new ArrayList<AddressHierarchyEntry>());
         when(addressHierarchyService.getChildAddressHierarchyEntries(Matchers.same(addressHierarchyEntry))).thenReturn(childAddressHierarchyEntries);
 
-        Map<String, List<String>> markers = locationBasedFilterEvaluator.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
+        Map<String, List<String>> markers = locationBasedOfflineSyncStrategy.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
         Map categoryFilterMap = new HashMap();
         ArrayList<String> transactionalDataFilters = new ArrayList<String>();
         transactionalDataFilters.add("202020");
@@ -274,7 +316,7 @@ public class LocationBasedFilterEvaluatorTest {
         when(addressHierarchyService.getChildAddressHierarchyEntries(Matchers.same(addressHierarchyEntry))).thenReturn(childAddressHierarchyEntries);
         when(addressHierarchyService.getChildAddressHierarchyEntryByName(any(AddressHierarchyEntry.class), anyString())).thenReturn(childAddressHierarchyEntry2);
 
-        Map<String, List<String>> markers = locationBasedFilterEvaluator.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
+        Map<String, List<String>> markers = locationBasedOfflineSyncStrategy.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
         Map categoryFilterMap = new HashMap();
         ArrayList<String> transactionalDataFilters = new ArrayList<String>();
         transactionalDataFilters.add("202020");
@@ -325,7 +367,7 @@ public class LocationBasedFilterEvaluatorTest {
         when(addressHierarchyService.getChildAddressHierarchyEntryByName(any(AddressHierarchyEntry.class), eq(("Ward No-01")))).thenReturn(childAddressHierarchyEntry1);
         when(addressHierarchyService.getChildAddressHierarchyEntryByName(any(AddressHierarchyEntry.class), eq(("Ward No-02")))).thenReturn(childAddressHierarchyEntry2);
 
-        Map<String, List<String>> markers = locationBasedFilterEvaluator.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
+        Map<String, List<String>> markers = locationBasedOfflineSyncStrategy.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
         Map categoryFilterMap = new HashMap();
         ArrayList<String> transactionalDataFilters = new ArrayList<String>();
         transactionalDataFilters.add("202020");
@@ -367,6 +409,6 @@ public class LocationBasedFilterEvaluatorTest {
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Please check your catchmentFilters configuration in openmrs!!");
-        Map<String, List<String>> markers = locationBasedFilterEvaluator.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
+        locationBasedOfflineSyncStrategy.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
     }
 }

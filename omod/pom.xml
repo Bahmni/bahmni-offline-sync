@@ -13,31 +13,27 @@
 	<name>Bahmni Offline Sync Module OMOD</name>
 	<description>OMOD project for BahmniOfflineSync</description>
 
-	<properties>
-		<addressHierarchyVersion>2.8</addressHierarchyVersion>
-	</properties>
-
 	<dependencies>
 
-		<!-- 
-		Add other dependencies from parent's pom: 
-		<dependency> 
-			<groupId>org.other.library</groupId> 
-			<artifactId>library-name</artifactId> 
-		</dependency> 
+		<!--
+		Add other dependencies from parent's pom:
+		<dependency>
+			<groupId>org.other.library</groupId>
+			<artifactId>library-name</artifactId>
+		</dependency>
 		-->
-		
+
 		<!-- Begin OpenMRS modules -->
-		
+
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>${project.parent.artifactId}-api</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-		
-				
+
+
 		<!-- End OpenMRS modules -->
-		
+
 
 		<!-- Begin OpenMRS core -->
 
@@ -49,17 +45,16 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<type>test-jar</type>
+		</dependency>
+
+		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>
 			<scope>provided</scope>
 			<type>jar</type>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.openmrs.api</groupId>
-			<artifactId>openmrs-api</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -72,7 +67,8 @@
 		<dependency>
 			<groupId>org.openmrs.test</groupId>
 			<artifactId>openmrs-test</artifactId>
-			<type>pom</type>
+			<version>${openMRSVersion}</version>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 
@@ -88,16 +84,14 @@
 			<artifactId>openmrs-atomfeed-common</artifactId>
 			<version>${openmrsAtomfeedVersion}</version>
 		</dependency>
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>webservices.rest-omod-common</artifactId>
-            <version>2.12</version>
-        </dependency>
+
 		<dependency>
-			<groupId>org.openmrs.api</groupId>
-			<artifactId>openmrs-api</artifactId>
-			<version>2.0.0-alpha</version>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>webservices.rest-omod-common</artifactId>
+			<version>${openMRSWebServicesVersion}</version>
+			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>addresshierarchy-api</artifactId>
@@ -112,18 +106,22 @@
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>4.3.0.RC1</version>
-            <scope>test</scope>
-        </dependency>
+
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>4.3.0.RC1</version>
+			<groupId>org.bahmni.test</groupId>
+			<artifactId>bahmni-test-commons</artifactId>
+			<version>0.85-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>webservices.rest-omod</artifactId>
+			<version>${openMRSWebServicesVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+
+
 
 		<!-- End OpenMRS core -->
 
@@ -169,7 +167,7 @@
 						<includeEmptyDirs>true</includeEmptyDirs>
 					</configuration>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>

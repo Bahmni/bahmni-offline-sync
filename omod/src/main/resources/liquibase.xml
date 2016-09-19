@@ -26,4 +26,28 @@
             <replace replace="name-of-uuid-function" with="UUID()"/>
         </modifySql>
     </changeSet>
+    <changeSet id="change-bahmni-offline-global-property" author="tw" context="rel3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM global_property where property = 'bahmniOfflineSync.eventlog.filterEvaluator'
+            </sqlCheck>
+        </preConditions>
+        <comment>rel3</comment>
+        <sql>
+            UPDATE global_property SET property = 'bahmniOfflineSync.strategy' WHERE property = 'bahmniOfflineSync.eventlog.filterEvaluator';
+        </sql>
+    </changeSet>
+    <changeSet id="change-bahmni-offline-global-property-value" author="tw" context="rel3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM global_property  property ='bahmniOfflineSync.strategy' and property_value = 'org.bahmni.module.bahmniOfflineSync.filter.LocationBasedFilterEvaluator'
+            </sqlCheck>
+        </preConditions>
+        <comment>rel3</comment>
+        <sql>
+            UPDATE global_property SET property_value =
+            'org.bahmni.module.bahmniOfflineSync.strategy.LocationBasedOfflineSyncStrategy' WHERE property ='bahmniOfflineSync.strategy' and property_value = 'org.bahmni.module.bahmniOfflineSync.filter.LocationBasedFilterEvaluator'
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

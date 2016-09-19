@@ -36,14 +36,16 @@
 	</modules>
 
 	<properties>
-		<openMRSVersion>1.12.0</openMRSVersion>
-		<atomfeed.version>1.9.1</atomfeed.version>
-		<openmrsAtomfeedVersion>2.5.1</openmrsAtomfeedVersion>
-		<serializationXstreamModuleVersion>0.2.7</serializationXstreamModuleVersion>
+		<openMRSVersion>2.0.0</openMRSVersion>
+		<atomfeed.version>1.9.4-SNAPSHOT</atomfeed.version>
+		<openmrsAtomfeedVersion>2.5.5-SNAPSHOT</openmrsAtomfeedVersion>
+		<serializationXstreamModuleVersion>0.2.12-SNAPSHOT</serializationXstreamModuleVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<addressHierarchyVersion>2.8</addressHierarchyVersion>
+		<addressHierarchyVersion>2.9</addressHierarchyVersion>
         <springVersion>3.2.7.RELEASE</springVersion>
 		<openMRSWebServicesVersion>2.14</openMRSWebServicesVersion>
+		<junitVersion>4.12</junitVersion>
+		<powerMockVersion>1.6.5</powerMockVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -59,8 +61,24 @@
 				<scope>compile</scope>
 			</dependency>
 			-->
-
-
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junitVersion}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-module-junit4</artifactId>
+				<version>${powerMockVersion}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-api-mockito</artifactId>
+				<version>${powerMockVersion}</version>
+				<scope>test</scope>
+			</dependency>
 
 			<!-- Begin OpenMRS core -->
 
@@ -105,6 +123,20 @@
 				<groupId>org.openmrs.test</groupId>
 				<artifactId>openmrs-test</artifactId>
 				<version>${openMRSVersion}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.powermock</groupId>
+						<artifactId>powermock-module-junit4</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.powermock</groupId>
+						<artifactId>powermock-api-mockito</artifactId>
+					</exclusion>
+				</exclusions>
 				<scope>test</scope>
 			</dependency>
 
@@ -181,8 +213,8 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<configuration>
-						<target>1.6</target>
-						<source>1.6</source>
+						<target>1.8</target>
+						<source>1.8</source>
 					</configuration>
 				</plugin>
 				<plugin>

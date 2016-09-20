@@ -18,22 +18,23 @@
 		<require_module>org.openmrs.module.webservices.rest</require_module>
 		<require_module>org.ict4h.openmrs.openmrs-atomfeed</require_module>
 		<require_module>org.openmrs.module.addresshierarchy</require_module>
+		<require_module>org.openmrs.module.idgen</require_module>
 	</require_modules>
 
 	<!-- / Module Properties -->
 
-	
+
 	<!-- Module Activator -->
 	<activator>org.bahmni.module.bahmniOfflineSync.BahmniOfflineSyncActivator</activator>
 	<advice>
 		<point>org.openmrs.api.ConceptService</point>
 		<class>org.bahmni.module.bahmniOfflineSync.advice.ConceptServiceInterceptor</class>
 	</advice>
-	
-	
+
+
 	<!-- Maps hibernate file's, if present -->
 	<mappingFiles>
-				
+
 	</mappingFiles>
 
 	<!-- Internationalization -->

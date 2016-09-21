@@ -40,13 +40,12 @@
     <changeSet id="change-bahmni-offline-global-property-value" author="tw" context="rel3">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
-                SELECT COUNT(*) FROM global_property  property ='bahmniOfflineSync.strategy' and property_value = 'org.bahmni.module.bahmniOfflineSync.filter.LocationBasedFilterEvaluator'
+                SELECT COUNT(*) FROM global_property where property ='bahmniOfflineSync.strategy' and property_value = 'org.bahmni.module.bahmniOfflineSync.filter.LocationBasedFilterEvaluator'
             </sqlCheck>
         </preConditions>
         <comment>rel3</comment>
         <sql>
-            UPDATE global_property SET property_value =
-            'org.bahmni.module.bahmniOfflineSync.strategy.LocationBasedOfflineSyncStrategy' WHERE property ='bahmniOfflineSync.strategy' and property_value = 'org.bahmni.module.bahmniOfflineSync.filter.LocationBasedFilterEvaluator'
+            UPDATE global_property SET property_value = 'org.bahmni.module.bahmniOfflineSync.strategy.LocationBasedOfflineSyncStrategy' WHERE property ='bahmniOfflineSync.strategy' and property_value = 'org.bahmni.module.bahmniOfflineSync.filter.LocationBasedFilterEvaluator'
         </sql>
     </changeSet>
 

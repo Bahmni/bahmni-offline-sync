@@ -10,7 +10,7 @@ import java.util.Map;
 public interface OfflineSyncStrategy {
     public List<EventLog> getEventLogsFromEventRecords(List<EventRecord> eventRecords);
 
-    public Map<String, List<String>> getFilterForDevice(String provider, String addressUuid, String loginLocationUuid);
+    public Map<String, List<String>> getFilterForDevice(String providerUuid, String addressUuid, String loginLocationUuid);
 
     public List<String> getEventCategoriesList();
 }

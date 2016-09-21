@@ -73,8 +73,8 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
             }
         }
 
-        categoryFilterMap.put("TransactionalData", filters);
-        categoryFilterMap.put("AddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("transactionalData", filters);
+        categoryFilterMap.put("addressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
 
         return categoryFilterMap;
@@ -84,8 +84,8 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
     public List<String> getEventCategoriesList() {
         List<String> eventCategoryList = new ArrayList();
 
-        eventCategoryList.add("TransactionalData");
-        eventCategoryList.add("AddressHierarchy");
+        eventCategoryList.add("transactionalData");
+        eventCategoryList.add("addressHierarchy");
         eventCategoryList.add("offline-concepts");
 
         return eventCategoryList;
@@ -116,6 +116,8 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
                     filter = evaluateFilterForPatient(uuid);
                 else if (category.equalsIgnoreCase("Encounter"))
                     filter = evaluateFilterForEncounter(uuid);
+                else if (category.equalsIgnoreCase("addressHierarchy"))
+                    filter = null;
                 eventLog.setFilter(filter);
             }
 

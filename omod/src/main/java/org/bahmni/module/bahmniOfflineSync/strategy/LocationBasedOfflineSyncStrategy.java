@@ -69,9 +69,9 @@ public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
         AddressHierarchyService addressHierarchyService = Context.getService(AddressHierarchyService.class);
         AddressHierarchyEntry addressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntryByUuid(addressUuid);
         List transactionalDataFilters = getTransactionalDataFilters(loginLocationUuid, addressHierarchyService, addressHierarchyEntry);
-        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
-        categoryFilterMap.put("AddressHierarchy", getFiltersForAddressHierarchy(addressHierarchyEntry));
-        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("addressHierarchy", getFiltersForAddressHierarchy(addressHierarchyEntry));
+        categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         return categoryFilterMap;
     }
@@ -144,9 +144,9 @@ public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
     public List<String> getEventCategoriesList() {
         List<String> eventCategoryList = new ArrayList();
 
-        eventCategoryList.add("TransactionalData");
-        eventCategoryList.add("AddressHierarchy");
-        eventCategoryList.add("ParentAddressHierarchy");
+        eventCategoryList.add("transactionalData");
+        eventCategoryList.add("addressHierarchy");
+        eventCategoryList.add("parentAddressHierarchy");
         eventCategoryList.add("offline-concepts");
 
         return eventCategoryList;
@@ -187,7 +187,7 @@ public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
                     filter = evaluateFilterForPatient(uuid);
                 else if (category.equalsIgnoreCase("Encounter") || category.equalsIgnoreCase("SHREncounter"))
                     filter = evaluateFilterForEncounter(uuid);
-                else if (category.equalsIgnoreCase("AddressHierarchy"))
+                else if (category.equalsIgnoreCase("addressHierarchy"))
                     filter = evaluateFilterForAddressHierarchy(uuid);
             }
             eventLog.setFilter(filter);

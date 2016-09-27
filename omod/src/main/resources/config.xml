@@ -30,6 +30,10 @@
 		<point>org.openmrs.api.ConceptService</point>
 		<class>org.bahmni.module.bahmniOfflineSync.advice.ConceptServiceInterceptor</class>
 	</advice>
+	<advice>
+		<point>org.openmrs.api.EncounterService</point>
+		<class>org.bahmni.module.bahmniOfflineSync.advice.EncounterServiceInterceptor</class>
+	</advice>
 
 
 	<!-- Maps hibernate file's, if present -->

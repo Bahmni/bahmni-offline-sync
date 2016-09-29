@@ -133,8 +133,8 @@ public class IDBasedSyncStrategyTest {
     @Test
     public void shouldGetCategoryList() throws Exception {
         List<String> categories = idBasedSyncStrategy.getEventCategoriesList();
-        assertTrue(categories.contains("TransactionalData"));
-        assertTrue(categories.contains("AddressHierarchy"));
+        assertTrue(categories.contains("transactionalData"));
+        assertTrue(categories.contains("addressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
         assertTrue(categories.size() == 3);
     }
@@ -156,8 +156,8 @@ public class IDBasedSyncStrategyTest {
         ArrayList<String> transactionalDataFilters = new ArrayList<String>();
         transactionalDataFilters.add("GAN");
 
-        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
-        categoryFilterMap.put("AddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("addressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
 

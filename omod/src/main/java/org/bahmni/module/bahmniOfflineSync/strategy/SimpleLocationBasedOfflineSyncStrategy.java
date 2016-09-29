@@ -66,8 +66,8 @@ public class SimpleLocationBasedOfflineSyncStrategy implements OfflineSyncStrate
         AddressHierarchyService addressHierarchyService = Context.getService(AddressHierarchyService.class);
         AddressHierarchyEntry addressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntryByUuid(addressUuid);
         List transactionalDataFilters = getTransactionalDataFilters(addressHierarchyService, addressHierarchyEntry);
-        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
-        categoryFilterMap.put("AddressHierarchy", getFilters(addressHierarchyEntry));
+        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("addressHierarchy", getFilters(addressHierarchyEntry));
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         return categoryFilterMap;
     }
@@ -118,8 +118,8 @@ public class SimpleLocationBasedOfflineSyncStrategy implements OfflineSyncStrate
     @Override
     public List<String> getEventCategoriesList() {
         List<String> eventCategoryList = new ArrayList();
-        eventCategoryList.add("TransactionalData");
-        eventCategoryList.add("AddressHierarchy");
+        eventCategoryList.add("transactionalData");
+        eventCategoryList.add("addressHierarchy");
         eventCategoryList.add("offline-concepts");
         return eventCategoryList;
     }

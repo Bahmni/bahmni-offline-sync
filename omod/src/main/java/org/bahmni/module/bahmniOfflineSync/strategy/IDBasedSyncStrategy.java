@@ -26,6 +26,8 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
 
     private IdentifierSourceService identifierSourceService;
 
+    private String encounterURL = "/openmrs/ws/rest/v1/bahmnicore/bahmniencounter/%s?includeAll=true";
+
     public IDBasedSyncStrategy() {
         this.patientService = Context.getPatientService();
         this.encounterService = Context.getEncounterService();
@@ -38,7 +40,7 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
         final Patient patient = patientService.getPatientByUuid(uuid);
 
         if (patient != null) {
-            final PatientIdentifier identifier = patient.getPatientIdentifier("Patient Identifier");
+            PatientIdentifier identifier = getPatientIdentifier(patient);
             final List<IdentifierSource> identifierSources = identifierSourceService.getAllIdentifierSources(false);
 
             for (IdentifierSource src : identifierSources) {
@@ -49,6 +51,23 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
         }
 
         return null;
+    }
+
+    private PatientIdentifier getPatientIdentifier(Patient patient) {
+        String identifierTypeName = "Patient Identifier";
+        PatientIdentifier identifier = patient.getPatientIdentifier(identifierTypeName);
+        if(identifier == null){
+            Set<PatientIdentifier> piList = patient.getIdentifiers();
+            for(PatientIdentifier pi : piList){
+                if(pi.getIdentifierType().getName().equals(identifierTypeName)){
+                    if(identifier == null)
+                        identifier = pi;
+                    else if(pi.getDateCreated().after(identifier.getDateCreated()))
+                        identifier = pi;
+                }
+            }
+        }
+        return identifier;
     }
 
     private String evaluateFilterForEncounter(String uuid) {
@@ -114,8 +133,10 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
                 String filter = "";
                 if (category.equalsIgnoreCase("Patient") || category.equalsIgnoreCase("LabOrderResults"))
                     filter = evaluateFilterForPatient(uuid);
-                else if (category.equalsIgnoreCase("Encounter"))
+                else if (category.equals("Encounter")) {
                     filter = evaluateFilterForEncounter(uuid);
+                    eventLog.setObject(String.format(encounterURL,uuid));
+                }
                 else if (category.equalsIgnoreCase("addressHierarchy"))
                     filter = null;
                 eventLog.setFilter(filter);

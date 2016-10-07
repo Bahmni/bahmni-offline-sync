@@ -34,6 +34,10 @@
 		<point>org.openmrs.api.EncounterService</point>
 		<class>org.bahmni.module.bahmniOfflineSync.advice.EncounterServiceInterceptor</class>
 	</advice>
+	<advice>
+		<point>org.openmrs.api.PatientService</point>
+		<class>org.bahmni.module.bahmniOfflineSync.advice.PatientServiceInterceptor</class>
+	</advice>
 
 
 	<!-- Maps hibernate file's, if present -->

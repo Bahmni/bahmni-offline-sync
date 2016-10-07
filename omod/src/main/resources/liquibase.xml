@@ -48,5 +48,15 @@
             UPDATE global_property SET property_value = 'org.bahmni.module.bahmniOfflineSync.strategy.LocationBasedOfflineSyncStrategy' WHERE property ='bahmniOfflineSync.strategy' and property_value = 'org.bahmni.module.bahmniOfflineSync.filter.LocationBasedFilterEvaluator'
         </sql>
     </changeSet>
-
+    <changeSet id="generate-event-record-for-existing-lab-results" author="tw" context="rel3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM event_records where category='LabOrderResults'
+            </sqlCheck>
+        </preConditions>
+        <comment>rel3</comment>
+        <sql>
+            INSERT INTO event_records (uuid, title, timestamp, uri, object, category, date_created) (SELECT UUID(), 'Lab Order Results', now(), CONCAT('/openmrs/ws/rest/v1/bahmnicore/labOrderResults?patientUuid=', p.uuid), CONCAT('/openmrs/ws/rest/v1/bahmnicore/labOrderResults?patientUuid=', p.uuid), 'LabOrderResults', now() FROM person p, encounter e, encounter_type et WHERE p.person_id = e.patient_id AND e.encounter_type = et.encounter_type_id AND et.name = 'LAB_RESULT');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

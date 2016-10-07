@@ -185,7 +185,7 @@ public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
 
                 if (category.equalsIgnoreCase("Patient")|| category.equalsIgnoreCase("LabOrderResults"))
                     filter = evaluateFilterForPatient(uuid);
-                else if (category.equalsIgnoreCase("Encounter") || category.equalsIgnoreCase("SHREncounter"))
+                else if (category.equals("Encounter") || category.equals("SHREncounter"))
                     filter = evaluateFilterForEncounter(uuid);
                 else if (category.equalsIgnoreCase("addressHierarchy"))
                     filter = evaluateFilterForAddressHierarchy(uuid);

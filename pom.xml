@@ -224,6 +224,19 @@
 				<updatePolicy>interval:10080</updatePolicy>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>bahmni-artifactory</id>
+			<name>bahmni-artifactory-snapshots</name>
+			<url>http://bahmnirepo.thoughtworks.com/artifactory/libs-snapshot-local</url>
+			<snapshots>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>bahmni-artifactory-releases</id>
+			<name>bahmni-artifactory-releases</name>
+			<url>http://bahmnirepo.thoughtworks.com/artifactory/libs-release-local</url>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>

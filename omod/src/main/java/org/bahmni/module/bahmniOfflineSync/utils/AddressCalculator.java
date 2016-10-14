@@ -10,6 +10,7 @@ import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
 import org.openmrs.module.addresshierarchy.AddressHierarchyLevel;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 
+import java.util.HashSet;
 import java.util.List;
 
 public class AddressCalculator {
@@ -37,8 +38,8 @@ public class AddressCalculator {
                 : null;
     }
 
-    public void addTopDownAddressFor(Patient p) {
-        PersonAddress address = p.getPersonAddress();
+    public void addTopDownAddressFor(Patient patient) {
+        PersonAddress address = patient.getPersonAddress();
         String addressCode = "";
 
         for (int level = service.getAddressHierarchyLevelsCount() - 2; level >= 1; level--) {
@@ -54,9 +55,16 @@ public class AddressCalculator {
             if (addressCode != null) break;
         }
 
+        HashSet<PersonAttribute> attrs = new HashSet<PersonAttribute>();
+        for (PersonAttribute attr : patient.getActiveAttributes()) {
+            if (!"addressCode".equals(attr.getAttributeType().getName()))
+                attrs.add(attr);
+        }
+
         PersonAttributeType type = personService.getPersonAttributeTypeByName("addressCode");
         if (type != null) {
-            p.addAttribute(new PersonAttribute(type, addressCode));
+            attrs.add(new PersonAttribute(type, addressCode));
+            patient.setAttributes(attrs);
         }
     }
 }

@@ -72,7 +72,7 @@ public class SimpleLocationBasedOfflineSyncStrategy implements OfflineSyncStrate
         return categoryFilterMap;
     }
 
-    private List getTransactionalDataFilters(AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
+    private List getTransactionalDataFilters( AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
         List transactionalDataFilters = new ArrayList();
         if (addressHierarchyEntry != null) {
             String userGeneratedId = addressHierarchyEntry.getUserGeneratedId();

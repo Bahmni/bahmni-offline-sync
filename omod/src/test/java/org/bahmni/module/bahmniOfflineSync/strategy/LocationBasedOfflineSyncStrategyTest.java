@@ -233,9 +233,9 @@ public class LocationBasedOfflineSyncStrategyTest {
     @Test
     public void shouldGetCategoryList() throws Exception {
         List<String> categories = locationBasedOfflineSyncStrategy.getEventCategoriesList();
-        assertTrue(categories.contains("TransactionalData"));
-        assertTrue(categories.contains("AddressHierarchy"));
-        assertTrue(categories.contains("ParentAddressHierarchy"));
+        assertTrue(categories.contains("transactionalData"));
+        assertTrue(categories.contains("addressHierarchy"));
+        assertTrue(categories.contains("parentAddressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
         assertTrue(categories.size() == 4);
     }
@@ -275,9 +275,9 @@ public class LocationBasedOfflineSyncStrategyTest {
         transactionalDataFilters.add("20202002");
         ArrayList<String> addressHierarchyFilters = new ArrayList<String>();
         addressHierarchyFilters.add("202020");
-        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
-        categoryFilterMap.put("AddressHierarchy", addressHierarchyFilters);
-        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
+        categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
     }
@@ -323,9 +323,9 @@ public class LocationBasedOfflineSyncStrategyTest {
         transactionalDataFilters.add("20202002");
         ArrayList<String> addressHierarchyFilters = new ArrayList<String>();
         addressHierarchyFilters.add("202020");
-        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
-        categoryFilterMap.put("AddressHierarchy", addressHierarchyFilters);
-        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
+        categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
     }
@@ -375,9 +375,9 @@ public class LocationBasedOfflineSyncStrategyTest {
         transactionalDataFilters.add("20202002");
         ArrayList<String> addressHierarchyFilters = new ArrayList<String>();
         addressHierarchyFilters.add("202020");
-        categoryFilterMap.put("TransactionalData", transactionalDataFilters);
-        categoryFilterMap.put("AddressHierarchy", addressHierarchyFilters);
-        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
+        categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
     }

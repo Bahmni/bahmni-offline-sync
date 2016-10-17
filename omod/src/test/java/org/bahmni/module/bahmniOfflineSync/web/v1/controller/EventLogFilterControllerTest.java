@@ -113,7 +113,7 @@ public class EventLogFilterControllerTest {
 
     @Test
     public void shouldGetFilterForAddressHierarchy() throws Exception {
-        eventRecord = new EventRecord("eventUuid", "p1", "", "/openmrs/addresshierarchy/9449ee4b-456d-44a1-b865-2be8158e29d2", new Date(), "AddressHierarchy");
+        eventRecord = new EventRecord("eventUuid", "p1", "", "/openmrs/addresshierarchy/9449ee4b-456d-44a1-b865-2be8158e29d2", new Date(), "addressHierarchy");
         when(eventRecordServiceHelper.getEventRecordsAfterUuid("lastReadUuid")).thenReturn(Collections.singletonList(eventRecord));
         AddressHierarchyLevel ahl = new AddressHierarchyLevel();
         ahl.setLevelId(6);
@@ -145,9 +145,9 @@ public class EventLogFilterControllerTest {
         Map categoryFilterMap = new HashMap();
         ArrayList<String> filters = new ArrayList<String>();
         filters.add("202020");
-        categoryFilterMap.put("TransactionalData", filters);
-        categoryFilterMap.put("AddressHierarchy", filters);
-        categoryFilterMap.put("ParentAddressHierarchy", new ArrayList<String>());
+        categoryFilterMap.put("transactionalData", filters);
+        categoryFilterMap.put("addressHierarchy", filters);
+        categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
 
@@ -158,9 +158,9 @@ public class EventLogFilterControllerTest {
         when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
 
         List<String> categories = controller.getCategoryList();
-        assertTrue(categories.contains("TransactionalData"));
-        assertTrue(categories.contains("AddressHierarchy"));
-        assertTrue(categories.contains("ParentAddressHierarchy"));
+        assertTrue(categories.contains("transactionalData"));
+        assertTrue(categories.contains("addressHierarchy"));
+        assertTrue(categories.contains("parentAddressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
         assertTrue(categories.size() == 4);
     }

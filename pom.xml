@@ -4,7 +4,7 @@
 
 	<groupId>org.bahmni.module</groupId>
 	<artifactId>bahmniOfflineSync</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.86-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Bahmni Offline Sync Module</name>
 	<description>Workarounds for offline sync until concept attributes is developed. This module will then become obselete.</description>
@@ -255,6 +255,19 @@
 			<snapshots>
 				<updatePolicy>interval:10080</updatePolicy>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>bahmni-artifactory</id>
+			<name>bahmni-artifactory-snapshots</name>
+			<url>http://bahmnirepo.thoughtworks.com/artifactory/libs-snapshot-local</url>
+			<snapshots>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>bahmni-artifactory-releases</id>
+			<name>bahmni-artifactory-releases</name>
+			<url>http://bahmnirepo.thoughtworks.com/artifactory/libs-release-local</url>
 		</repository>
 	</repositories>
 

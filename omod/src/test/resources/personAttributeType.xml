@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<dataset>
+    <person_attribute_type person_attribute_type_id="1" name="addressCode" description="code" format="java.lang.String" creator="1" date_created="2007-05-04 09:59:23.0" retired="false" uuid="b3b6d540-a32e-44c7-91b3-292d976675ab" sort_weight="1"/>
+</dataset>

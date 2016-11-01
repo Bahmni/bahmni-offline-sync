@@ -6,6 +6,7 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.addresshierarchy.AddressField;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
 import org.openmrs.module.addresshierarchy.AddressHierarchyLevel;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
@@ -13,46 +14,42 @@ import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 import java.util.List;
 
 public class AddressCalculator {
-    private AddressHierarchyService service;
+    private AddressHierarchyService addressHierarchyService;
     private PersonService personService;
 
     public AddressCalculator() {
-        service = Context.getService(AddressHierarchyService.class);
+        addressHierarchyService = Context.getService(AddressHierarchyService.class);
         personService = Context.getPersonService();
     }
 
-    private AddressHierarchyEntry getParent(AddressHierarchyLevel level, String name) {
-        List<AddressHierarchyEntry> entries = service.getAddressHierarchyEntriesByLevelAndName(level, name);
-        return entries.size() > 0 ? entries.get(0) : null;
-    }
 
-    private String getAddressCode(int level, String parentAddress, String childAddress) {
-        AddressHierarchyEntry parent = getParent(service.getAddressHierarchyLevel(level), parentAddress);
-
-        return (parent != null) ?
-                service.getAddressHierarchyEntriesByLevelAndNameAndParent(
-                        service.getAddressHierarchyLevel(level + 1),
-                        childAddress,
-                        parent).get(0).getUserGeneratedId()
-                : null;
+    private String getAddressCode(int level, AddressHierarchyEntry childAddress, PersonAddress personAddress) {
+        AddressHierarchyEntry parentAddress;
+        level = level + 1;
+        String addressString;
+        if (level <= addressHierarchyService.getBottomAddressHierarchyLevel().getLevelId()) {
+            addressString = getAddressValueForLevel(level, personAddress);
+        }else {
+            return childAddress.getUserGeneratedId();
+        }
+        parentAddress = childAddress;
+        AddressHierarchyLevel addressHierarchyLevel = addressHierarchyService.getAddressHierarchyLevel(level);
+        List<AddressHierarchyEntry> childAddressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntriesByLevelAndNameAndParent(addressHierarchyLevel, addressString, parentAddress);
+        if(childAddressHierarchyEntry==null || childAddressHierarchyEntry.isEmpty()){
+            return parentAddress.getUserGeneratedId();
+        }
+        return getAddressCode(level,childAddressHierarchyEntry.get(0),personAddress);
     }
 
     public void addTopDownAddressFor(Patient patient) {
         PersonAddress address = patient.getPersonAddress();
         String addressCode = "";
 
-        for (int level = service.getAddressHierarchyLevelsCount() - 2; level >= 1; level--) {
-            addressCode = getAddressCode(level, address.getAddress3(), address.getAddress2());
-            if (addressCode != null) break;
-            addressCode = getAddressCode(level, address.getAddress4(), address.getAddress3());
-            if (addressCode != null) break;
-            addressCode = getAddressCode(level, address.getAddress5(), address.getAddress4());
-            if (addressCode != null) break;
-            addressCode = getAddressCode(level, address.getCountyDistrict(), address.getAddress5());
-            if (addressCode != null) break;
-            addressCode = getAddressCode(level, address.getStateProvince(), address.getCountyDistrict());
-            if (addressCode != null) break;
-        }
+        AddressHierarchyLevel addressHierarchyLevel = addressHierarchyService.getTopAddressHierarchyLevel();
+        String addressString = getAddressValueForLevel(addressHierarchyLevel.getLevelId(), address);
+        List<AddressHierarchyEntry> childAddressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntriesByLevelAndName(addressHierarchyLevel, addressString);
+        addressCode = getAddressCode(addressHierarchyLevel.getLevelId(),  childAddressHierarchyEntry.get(0), address);
+
 
         PersonAttributeType type = personService.getPersonAttributeTypeByName("addressCode");
 
@@ -63,5 +60,39 @@ public class AddressCalculator {
             else
                 patient.addAttribute(new PersonAttribute(type, addressCode));
         }
+    }
+
+    private String getAddressValueForLevel(int addressHierarchyLevelID, PersonAddress personAddress) {
+        AddressHierarchyLevel addressHierarchyLevel = addressHierarchyService.getAddressHierarchyLevel(addressHierarchyLevelID);
+        AddressField addressField = addressHierarchyLevel.getAddressField();
+        String address = "";
+        if("address1".equals(addressField.getName()))
+            address = personAddress.getAddress1();
+        if("address2".equals(addressField.getName()))
+            address = personAddress.getAddress2();
+        if("address3".equals(addressField.getName()))
+            address = personAddress.getAddress3();
+        if("address4".equals(addressField.getName()))
+            address = personAddress.getAddress4();
+        if("address5".equals(addressField.getName()))
+            address = personAddress.getAddress5();
+        if("address6".equals(addressField.getName()))
+            address = personAddress.getAddress6();
+        if("cityVillage".equals(addressField.getName()))
+            address = personAddress.getCityVillage();
+        if("countyDistrict".equals(addressField.getName()))
+            address = personAddress.getCountyDistrict();
+        if("stateProvince".equals(addressField.getName()))
+            address = personAddress.getStateProvince();
+        if("country".equals(addressField.getName()))
+            address = personAddress.getCountry();
+        if("postalCode".equals(addressField.getName()))
+            address = personAddress.getPostalCode();
+        if("latitude".equals(addressField.getName()))
+            address = personAddress.getLatitude();
+        if("longitude".equals(addressField.getName()))
+            address = personAddress.getLongitude();
+
+        return address;
     }
 }

@@ -3,38 +3,24 @@ package org.bahmni.module.bahmniOfflineSync.strategy;
 import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
 import org.ict4h.atomfeed.server.domain.EventRecord;
 import org.openmrs.*;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.EncounterService;
-import org.openmrs.api.LocationService;
-import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 import org.springframework.util.StringUtils;
 
+import java.sql.SQLException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
+public class LocationBasedOfflineSyncStrategy extends AbstractOfflineSyncStrategy {
     private static final String ATTRIBUTE_TYPE_NAME = "addressCode";
 
-    private LocationService locationService;
 
-    private PatientService patientService;
+    public LocationBasedOfflineSyncStrategy() throws SQLException {
+        super();
 
-    private EncounterService encounterService;
-
-    private ConceptService conceptService;
-
-    public LocationBasedOfflineSyncStrategy() {
-        this.patientService = Context.getPatientService();
-        this.encounterService = Context.getEncounterService();
-        this.locationService = Context.getLocationService();
-        this.conceptService = Context.getConceptService();
     }
 
-    private String evaluateFilterForPatient(String uuid) {
+     protected String evaluateFilterForPatient(String uuid) {
         String patientFilter = "";
         Patient patient = patientService.getPatientByUuid(uuid);
 
@@ -152,6 +138,8 @@ public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
         return eventCategoryList;
     }
 
+
+
     private List<String> getFiltersForAddressHierarchy(AddressHierarchyEntry addressHierarchyEntry) {
         List addressHierarchyFilters = new ArrayList();
         while (addressHierarchyEntry.getParent() != null) {
@@ -169,7 +157,7 @@ public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
         List<EventLog> eventLogs = new ArrayList<EventLog>();
 
         for (EventRecord er : eventRecords) {
-            EventLog eventLog = new EventLog(er.getUuid(),er.getCategory(),er.getTimeStamp(),er.getContents(),null);
+            EventLog eventLog = new EventLog(er.getUuid(),er.getCategory(),er.getTimeStamp(),er.getContents(), er.getUuid(), er.getUuid());
             String category = er.getCategory();
             String uuid = getUuidFromURL(er.getContents());
             String filter = "";
@@ -198,14 +186,7 @@ public class LocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
         return eventLogs;
     }
 
-    private String getUuidFromURL(String url){
-        String uuid = "";
-        Pattern uuidPattern = Pattern.compile("([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
-        Matcher matcher = uuidPattern.matcher(url);
-        if (matcher.find())
-          uuid = matcher.group(0);
-        return uuid;
-    }
+
 
     private boolean isOfflineConceptEvent(String eventUuid) {
         final Concept concept = conceptService.getConceptByUuid(eventUuid);

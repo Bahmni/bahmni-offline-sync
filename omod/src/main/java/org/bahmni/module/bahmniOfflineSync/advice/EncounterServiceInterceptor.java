@@ -23,8 +23,9 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 
 public class EncounterServiceInterceptor  implements MethodInterceptor {
-    public static final String LAB_ORDER_RESULTS_URL = "/openmrs/ws/rest/v1/bahmnicore/labOrderResults?patientUuid=%s";
+    private static final String LAB_ORDER_RESULTS_URL = "/openmrs/ws/rest/v1/bahmnicore/labOrderResults?patientUuid=%s";
 
+    private final String category = "LabOrderResults";
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
     private EventService eventService;
 
@@ -68,7 +69,7 @@ public class EncounterServiceInterceptor  implements MethodInterceptor {
                 Patient patient = encounter.getPatient();
                 String url = String.format(LAB_ORDER_RESULTS_URL, patient.getUuid());
 
-                events.add(new Event(UUID.randomUUID().toString(), "Lab Order Results", DateTime.now(), url, url, "LabOrderResults"));
+                events.add(new Event(UUID.randomUUID().toString(), "Lab Order Results", DateTime.now(), url, url, category));
 
                 atomFeedSpringTransactionManager.executeWithTransaction(
                         new AFTransactionWorkWithoutResult() {

@@ -11,6 +11,7 @@ import org.ict4h.atomfeed.server.repository.jdbc.AllEventRecordsQueueJdbcImpl;
 import org.ict4h.atomfeed.server.service.EventServiceImpl;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -25,7 +26,8 @@ import java.util.List;
 public class EventRecordServiceHelper {
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
 
-    public EventRecordServiceHelper() throws SQLException {
+
+    public EventRecordServiceHelper() {
         atomFeedSpringTransactionManager = createTransactionManager();
 
     }
@@ -50,14 +52,14 @@ public class EventRecordServiceHelper {
         return eventRecords;
     }
 
-    private EventRecord findEventRecordByUuid(String uuid) {
+    public EventRecord findEventRecordByUuid(String uuid) {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<EventRecord> events = new ArrayList<EventRecord>();
         Connection connection = null;
         try {
             connection = atomFeedSpringTransactionManager.getConnection();
-            String queryString = String.format("select id from %s where uuid = ?", new Object[]{JdbcUtils.getTableName(Configuration.getInstance().getSchema(), "event_records")});
+            String queryString = String.format("select * from %s where uuid = ?", new Object[]{JdbcUtils.getTableName(Configuration.getInstance().getSchema(), "event_records")});
             stmt = connection.prepareStatement(queryString);
             stmt.setString(1, uuid);
             rs = stmt.executeQuery();

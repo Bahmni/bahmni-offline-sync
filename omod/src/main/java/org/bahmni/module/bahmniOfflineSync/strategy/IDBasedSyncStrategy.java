@@ -12,10 +12,8 @@ import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class IDBasedSyncStrategy implements OfflineSyncStrategy {
+public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
     private LocationService locationService;
 
     private PatientService patientService;
@@ -36,7 +34,7 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
         this.identifierSourceService = Context.getService(IdentifierSourceService.class);
     }
 
-    private String evaluateFilterForPatient(String uuid) {
+    protected String evaluateFilterForPatient(String uuid) {
         final Patient patient = patientService.getPatientByUuid(uuid);
 
         if (patient != null) {
@@ -50,6 +48,10 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
             }
         }
 
+        return null;
+    }
+
+    private String evaluateFilterForAddressHierarchy(String uuid) {
         return null;
     }
 
@@ -113,16 +115,15 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
     @Override
     public List<EventLog> getEventLogsFromEventRecords(List<EventRecord> eventRecords) {
         List<EventLog> eventLogs = new ArrayList<EventLog>();
-        Pattern uuidPattern = Pattern.compile("([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
 
         for (EventRecord er : eventRecords) {
-            EventLog eventLog = new EventLog(er.getUuid(), er.getCategory(), er.getTimeStamp(), er.getContents(), null);
+            EventLog eventLog = new EventLog(er.getUuid(), er.getCategory(), er.getTimeStamp(), er.getContents(), null, er.getUuid());
             String category = er.getCategory();
-            Matcher matcher = uuidPattern.matcher(er.getContents());
+            String uuid = getUuidFromURL(er.getContents());
+            String filter = "";
 
-            if (matcher.find()) {
-                String uuid = matcher.group(0);
-                if ((er.getCategory().equalsIgnoreCase("all-concepts"))) {
+            if (!uuid.isEmpty()) {
+                if ((category.equalsIgnoreCase("all-concepts"))) {
                     if (isOfflineConceptEvent(uuid)) {
                         eventLog.setCategory("offline-concepts");
                     } else {
@@ -130,7 +131,6 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
                     }
                 }
 
-                String filter = "";
                 if (category.equalsIgnoreCase("Patient") || category.equalsIgnoreCase("LabOrderResults"))
                     filter = evaluateFilterForPatient(uuid);
                 else if (category.equals("Encounter")) {
@@ -138,7 +138,7 @@ public class IDBasedSyncStrategy implements OfflineSyncStrategy {
                     eventLog.setObject(String.format(encounterURL,uuid));
                 }
                 else if (category.equalsIgnoreCase("addressHierarchy"))
-                    filter = null;
+                    filter = evaluateFilterForAddressHierarchy(uuid);
                 eventLog.setFilter(filter);
             }
 

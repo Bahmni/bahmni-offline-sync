@@ -21,6 +21,7 @@ import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.*;
 
@@ -43,6 +44,8 @@ public class LocationBasedOfflineSyncStrategyTest {
     @Mock
     private EncounterService encounterService;
     @Mock
+    private PlatformTransactionManager platformTransactionManager;
+    @Mock
     private AddressHierarchyService addressHierarchyService;
     @Mock
     private LocationService locationService;
@@ -60,6 +63,9 @@ public class LocationBasedOfflineSyncStrategyTest {
         Mockito.when(Context.getPatientService()).thenReturn(patientService);
         Mockito.when(Context.getEncounterService()).thenReturn(encounterService);
         Mockito.when(Context.getLocationService()).thenReturn(locationService);
+        List registeredComponents = new ArrayList();
+        registeredComponents.add(platformTransactionManager);
+        Mockito.when(Context.getRegisteredComponents(PlatformTransactionManager.class)).thenReturn(registeredComponents);
         locationBasedOfflineSyncStrategy = new LocationBasedOfflineSyncStrategy();
         patient = new Patient();
         patient.setUuid(patientUuid);

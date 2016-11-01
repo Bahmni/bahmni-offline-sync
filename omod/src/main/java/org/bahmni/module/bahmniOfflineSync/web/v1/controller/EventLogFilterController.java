@@ -12,11 +12,9 @@ import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +28,6 @@ public class EventLogFilterController extends BaseRestController {
     private EventRecordServiceHelper eventRecordServiceHelper;
 
     private OfflineSyncStrategy offlineSyncStrategy;
-    protected final Log log = LogFactory.getLog(getClass());
 
 
     @RequestMapping(method = RequestMethod.GET)
@@ -52,6 +49,18 @@ public class EventLogFilterController extends BaseRestController {
         List<EventRecord> eventRecords = eventRecordServiceHelper.getEventRecordsAfterUuid(lastReadUuid);
         if (offlineSyncStrategy != null) {
             return offlineSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        } else {
+            throw new RuntimeException("Global Property bahmniOfflineSync.strategy is not configured in OpenMRS. Configure classpath for OfflineSyncStrategy");
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "getEventsWithNewFilterForPatients",  params = {"eventRecordUuid"})
+    @ResponseBody
+    public List<EventLog> getEventsWithNewFilterForPatients(@RequestParam(value = "eventRecordUuid")List<String> eventRecordUuids) throws IllegalAccessException, InstantiationException, ClassNotFoundException, SQLException {
+        offlineSyncStrategy = syncStrategyLoader.getFilterEvaluatorFromGlobalProperties();
+        if (offlineSyncStrategy != null) {
+            return offlineSyncStrategy.getEventsWithNewFilterFor(eventRecordUuids);
         } else {
             throw new RuntimeException("Global Property bahmniOfflineSync.strategy is not configured in OpenMRS. Configure classpath for OfflineSyncStrategy");
         }

@@ -3,30 +3,15 @@ package org.bahmni.module.bahmniOfflineSync.strategy;
 import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
 import org.ict4h.atomfeed.server.domain.EventRecord;
 import org.openmrs.*;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.EncounterService;
-import org.openmrs.api.LocationService;
-import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class SimpleLocationBasedOfflineSyncStrategy implements OfflineSyncStrategy {
+public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncStrategy {
 
     private static final String ATTRIBUTE_TYPE_NAME = "addressCode";
-
-    private PatientService patientService;
-
-    private LocationService locationService;
-
-    private EncounterService encounterService;
-
-    private ConceptService conceptService;
 
     public SimpleLocationBasedOfflineSyncStrategy() {
         this.patientService = Context.getPatientService();
@@ -35,7 +20,7 @@ public class SimpleLocationBasedOfflineSyncStrategy implements OfflineSyncStrate
         this.conceptService = Context.getConceptService();
     }
 
-    private String evaluateFilterForPatient(String uuid) {
+    protected String evaluateFilterForPatient(String uuid) {
         String patientFilter = "";
         Patient patient = patientService.getPatientByUuid(uuid);
 
@@ -129,7 +114,7 @@ public class SimpleLocationBasedOfflineSyncStrategy implements OfflineSyncStrate
         List<EventLog> eventLogs = new ArrayList<EventLog>();
 
         for (EventRecord er : eventRecords) {
-            EventLog eventLog = new EventLog(er.getUuid(), er.getCategory(), er.getTimeStamp(), er.getContents(), null);
+            EventLog eventLog = new EventLog(er.getUuid(), er.getCategory(), er.getTimeStamp(), er.getContents(), er.getUuid(), null);
             String category = er.getCategory();
             String uuid = getUuidFromURL(er.getContents());
             String filter = "";
@@ -143,10 +128,12 @@ public class SimpleLocationBasedOfflineSyncStrategy implements OfflineSyncStrate
                     }
                 }
 
-                if (category.equalsIgnoreCase("Patient")|| category.equalsIgnoreCase("LabOrderResults"))
+                if (category.equalsIgnoreCase("Patient") || category.equalsIgnoreCase("LabOrderResults"))
                     filter = evaluateFilterForPatient(uuid);
-                else if (category.equals("Encounter"))
+                else if (category.equals("Encounter")) {
                     filter = evaluateFilterForEncounter(uuid);
+                    eventLog.setObject(String.format(encounterURL, uuid));
+                }
                 else if (category.equalsIgnoreCase("AddressHierarchy"))
                     filter = evaluateFilterForAddressHierarchy(uuid);
             }
@@ -158,14 +145,6 @@ public class SimpleLocationBasedOfflineSyncStrategy implements OfflineSyncStrate
         return eventLogs;
     }
 
-    private String getUuidFromURL(String url) {
-        String uuid = "";
-        Pattern uuidPattern = Pattern.compile("([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
-        Matcher matcher = uuidPattern.matcher(url);
-        if (matcher.find())
-            uuid = matcher.group(0);
-        return uuid;
-    }
 
     private boolean isOfflineConceptEvent(String eventUuid) {
         final Concept concept = conceptService.getConceptByUuid(eventUuid);

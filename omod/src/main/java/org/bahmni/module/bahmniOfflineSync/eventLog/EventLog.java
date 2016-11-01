@@ -15,11 +15,14 @@ public class EventLog {
 
     private String object;
 
-    public EventLog(String uuid, String category, Date timestamp, String object, String filter) {
+    private String parentUuid;
+
+    public EventLog(String uuid, String category, Date timestamp, String object,  String filter, String parentUuid) {
         this.uuid = uuid;
         this.category = category;
         this.timestamp = timestamp;
         this.object = object;
+        this.parentUuid = parentUuid;
         this.filter = filter;
     }
 
@@ -71,5 +74,9 @@ public class EventLog {
 
     public String getCategory() {
         return category;
+    }
+
+    public String getParentUuid() {
+        return parentUuid;
     }
 }

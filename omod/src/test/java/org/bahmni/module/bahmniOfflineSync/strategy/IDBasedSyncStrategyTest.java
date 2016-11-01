@@ -22,6 +22,7 @@ import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.*;
 
@@ -48,6 +49,8 @@ public class IDBasedSyncStrategyTest {
     @Mock
     private IdentifierSourceService identifierSourceService;
     @Mock
+    private PlatformTransactionManager platformTransactionManager;
+    @Mock
     private LocationService locationService;
     private AddressHierarchyEntry addressHierarchyEntry;
     private Patient patient;
@@ -65,6 +68,9 @@ public class IDBasedSyncStrategyTest {
         Mockito.when(Context.getEncounterService()).thenReturn(encounterService);
         Mockito.when(Context.getLocationService()).thenReturn(locationService);
         Mockito.when(Context.getService(IdentifierSourceService.class)).thenReturn(identifierSourceService);
+        List registeredComponents = new ArrayList();
+        registeredComponents.add(platformTransactionManager);
+        Mockito.when(Context.getRegisteredComponents(PlatformTransactionManager.class)).thenReturn(registeredComponents);
         idBasedSyncStrategy = new IDBasedSyncStrategy();
         patient = new Patient();
         patient.setUuid(patientUuid);

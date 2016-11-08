@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.bahmni.module</groupId>
 		<artifactId>bahmniOfflineSync</artifactId>
-		<version>0.86-SNAPSHOT</version>
+		<version>0.87-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>bahmniOfflineSync-omod</artifactId>
@@ -63,6 +63,24 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junitVersion}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>${powerMockVersion}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>${powerMockVersion}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.openmrs.test</groupId>
@@ -111,6 +129,20 @@
 			<groupId>org.bahmni.test</groupId>
 			<artifactId>bahmni-test-commons</artifactId>
 			<version>0.85-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.powermock</groupId>
+					<artifactId>powermock-module-junit4</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.powermock</groupId>
+					<artifactId>powermock-api-mockito</artifactId>
+				</exclusion>
+			</exclusions>
 			<scope>test</scope>
 		</dependency>
 

@@ -36,14 +36,14 @@
 	</modules>
 
 	<properties>
-		<openMRSVersion>2.0.0</openMRSVersion>
+		<openMRSVersion>2.0.1</openMRSVersion>
 		<atomfeed.version>1.9.4-SNAPSHOT</atomfeed.version>
 		<openmrsAtomfeedVersion>2.5.5-SNAPSHOT</openmrsAtomfeedVersion>
-		<serializationXstreamModuleVersion>0.2.12-SNAPSHOT</serializationXstreamModuleVersion>
+		<serializationXstreamModuleVersion>0.2.12</serializationXstreamModuleVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<addressHierarchyVersion>2.9</addressHierarchyVersion>
-        <springVersion>3.2.7.RELEASE</springVersion>
-		<openMRSWebServicesVersion>2.14</openMRSWebServicesVersion>
+        <springVersion>4.1.4.RELEASE</springVersion>
+		<openMRSWebServicesVersion>2.16</openMRSWebServicesVersion>
 		<junitVersion>4.12</junitVersion>
 		<powerMockVersion>1.6.5</powerMockVersion>
 	</properties>
@@ -188,12 +188,6 @@
 				<version>${openMRSWebServicesVersion}</version>
 				<type>jar</type>
 				<scope>provided</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>org.openmrs.module</groupId>
-						<artifactId>webservices.rest-omod-2.0</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.openmrs.module</groupId>

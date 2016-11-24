@@ -110,7 +110,7 @@
 		<dependency>
 			<groupId>org.bahmni.test</groupId>
 			<artifactId>bahmni-test-commons</artifactId>
-			<version>0.85-SNAPSHOT</version>
+			<version>0.86-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 

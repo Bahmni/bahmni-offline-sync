@@ -67,7 +67,7 @@ public class EventRecordServiceHelper {
         } catch (SQLException var11) {
             throw new AtomFeedRuntimeException(var11);
         } finally {
-            this.closeAll(stmt, rs, connection);
+            this.closeAll(stmt, rs);
         }
         return !events.isEmpty() ? events.get(0) : null;
 
@@ -88,15 +88,14 @@ public class EventRecordServiceHelper {
         } catch (SQLException var11) {
             throw new AtomFeedRuntimeException(var11);
         } finally {
-            this.closeAll(stmt, rs, connection);
+            this.closeAll(stmt, rs);
         }
         return events;
     }
 
-    private void closeAll(PreparedStatement stmt, ResultSet rs, Connection connection) {
+    private void closeAll(PreparedStatement stmt, ResultSet rs) {
         this.close(rs);
         this.close(stmt);
-        this.close(connection);
     }
 
     private void close(AutoCloseable rs) {
@@ -128,7 +127,7 @@ public class EventRecordServiceHelper {
         } catch (SQLException var11) {
             throw new AtomFeedRuntimeException(var11);
         } finally {
-            this.closeAll(stmt, rs, connection);
+            this.closeAll(stmt, rs);
         }
         return events;
     }

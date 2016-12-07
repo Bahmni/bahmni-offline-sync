@@ -8,7 +8,6 @@ import org.ict4h.atomfeed.server.service.Event;
 import org.ict4h.atomfeed.server.service.EventService;
 import org.ict4h.atomfeed.server.service.EventServiceImpl;
 import org.ict4h.atomfeed.transaction.AFTransactionWorkWithoutResult;
-import org.joda.time.DateTime;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
@@ -56,7 +55,7 @@ public class PatientServiceInterceptor implements MethodInterceptor{
             Object[] arguments = invocation.getArguments();
             Patient patient = (Patient) arguments[0];
             String contents = String.format(TEMPLATE, patient.getUuid());
-            final Event event = new Event(UUID.randomUUID().toString(), TITLE, DateTime.now(), (URI) null, contents, CATEGORY);
+            final Event event = new Event(UUID.randomUUID().toString(), TITLE, null, (URI) null, contents, CATEGORY);
 
             events.add(event);
 

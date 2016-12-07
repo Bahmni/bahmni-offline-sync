@@ -15,14 +15,6 @@
 
 	<dependencies>
 
-		<!--
-		Add other dependencies from parent's pom:
-		<dependency>
-			<groupId>org.other.library</groupId>
-			<artifactId>library-name</artifactId>
-		</dependency>
-		-->
-
 		<!-- Begin OpenMRS modules -->
 
 		<dependency>
@@ -31,141 +23,70 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 
-
-		<!-- End OpenMRS modules -->
-
-
-		<!-- Begin OpenMRS core -->
-
 		<dependency>
 			<groupId>org.openmrs.api</groupId>
 			<artifactId>openmrs-api</artifactId>
-			<scope>provided</scope>
-			<type>jar</type>
 		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.api</groupId>
-			<artifactId>openmrs-api</artifactId>
-			<type>test-jar</type>
-		</dependency>
-
 		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>
-			<scope>provided</scope>
-			<type>jar</type>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.web</groupId>
-			<artifactId>openmrs-web</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junitVersion}</version>
-			<scope>test</scope>
+			<groupId>org.ict4h</groupId>
+			<artifactId>atomfeed-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ict4h.openmrs</groupId>
+			<artifactId>openmrs-atomfeed-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>addresshierarchy-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>addresshierarchy-omod</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>webservices.rest-omod</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>idgen-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4</artifactId>
-			<version>${powerMockVersion}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito</artifactId>
-			<version>${powerMockVersion}</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openmrs.test</groupId>
 			<artifactId>openmrs-test</artifactId>
-			<version>${openMRSVersion}</version>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.web</groupId>
+			<artifactId>openmrs-web</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
-			<groupId>org.ict4h</groupId>
-			<artifactId>atomfeed-server</artifactId>
-			<version>${atomfeed.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.ict4h.openmrs</groupId>
-			<artifactId>openmrs-atomfeed-common</artifactId>
-			<version>${openmrsAtomfeedVersion}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>webservices.rest-omod-common</artifactId>
-			<version>${openMRSWebServicesVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>addresshierarchy-api</artifactId>
-			<version>${addressHierarchyVersion}</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>addresshierarchy-omod</artifactId>
-			<version>${addressHierarchyVersion}</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.bahmni.test</groupId>
-			<artifactId>bahmni-test-commons</artifactId>
-			<version>0.85-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.powermock</groupId>
-					<artifactId>powermock-module-junit4</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.powermock</groupId>
-					<artifactId>powermock-api-mockito</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>webservices.rest-omod</artifactId>
-			<version>${openMRSWebServicesVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>idgen-api</artifactId>
-			<version>4.3</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.3.1</version>
-		</dependency>
-		<!-- End OpenMRS core -->
-
 	</dependencies>
 
 	<build>

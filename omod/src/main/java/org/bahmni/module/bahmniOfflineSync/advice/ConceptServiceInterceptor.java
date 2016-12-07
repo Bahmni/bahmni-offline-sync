@@ -8,7 +8,6 @@ import org.ict4h.atomfeed.server.service.Event;
 import org.ict4h.atomfeed.server.service.EventService;
 import org.ict4h.atomfeed.server.service.EventServiceImpl;
 import org.ict4h.atomfeed.transaction.AFTransactionWorkWithoutResult;
-import org.joda.time.DateTime;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSet;
 import org.openmrs.api.context.Context;
@@ -78,12 +77,12 @@ public class ConceptServiceInterceptor implements MethodInterceptor {
             for (ConceptSet setmember : newlyAddedSetMembers) {
                 if (setmember.getConceptSetId() != null) {
                     String url = String.format(CONCEPT_NAME_URL, setmember.getConcept().getUuid(), setmember.getConcept().getName(Context.getLocale()).getName().replaceAll(" ", "+"));
-                    events.add(new Event(UUID.randomUUID().toString(), "Offline Concepts", DateTime.now(), url, url, "offline-concepts"));
+                    events.add(new Event(UUID.randomUUID().toString(), "Offline Concepts", null, url, url, "offline-concepts"));
                 }
             }
 
             String url = String.format(CONCEPT_NAME_URL, concept.getUuid(), concept.getName(Context.getLocale()).getName().replaceAll(" ", "+"));
-            events.add(new Event(UUID.randomUUID().toString(), "concepts", DateTime.now(), url, url, "all-concepts"));
+            events.add(new Event(UUID.randomUUID().toString(), "concepts", null, url, url, "all-concepts"));
 
             atomFeedSpringTransactionManager.executeWithTransaction(
                     new AFTransactionWorkWithoutResult() {

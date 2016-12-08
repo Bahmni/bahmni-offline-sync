@@ -58,7 +58,7 @@ public class EventLogFilterControllerTest {
     EventRecordServiceHelper eventRecordServiceHelper;
     private EventRecord eventRecord;
 
-    private LocationBasedOfflineSyncStrategy locationBasedOfflineSyncStrategy;
+    private LocationBasedSyncStrategy locationBasedSyncStrategy;
     AddressHierarchyEntry addressHierarchyEntry;
     Patient patient;
     Encounter encounter;
@@ -73,7 +73,7 @@ public class EventLogFilterControllerTest {
         List registeredComponents = new ArrayList();
         registeredComponents.add(platformTransactionManager);
         Mockito.when(Context.getRegisteredComponents(PlatformTransactionManager.class)).thenReturn(registeredComponents);
-        locationBasedOfflineSyncStrategy = new LocationBasedOfflineSyncStrategy();
+        locationBasedSyncStrategy = new LocationBasedSyncStrategy();
         patient = new Patient();
         patient.setUuid("patientUuid");
         encounter = new Encounter();
@@ -95,7 +95,7 @@ public class EventLogFilterControllerTest {
 
     @Test
     public void shouldGetFilterForPatient() throws Exception {
-        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedSyncStrategy);
         when(eventRecordServiceHelper.getEventRecordsAfterUuid("lastReadUuid")).thenReturn(Collections.singletonList(eventRecord));
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
         List<EventLog> eventLogs = controller.getEventLogsAfter("lastReadUuid");
@@ -108,7 +108,7 @@ public class EventLogFilterControllerTest {
     public void shouldGetFilterForEncounter() throws Exception {
         eventRecord = new EventRecord("eventUuid", "p1", "", "/openmrs/encounter/9449ee4b-456d-44a1-b865-2be8158e29d2", new Date(), "Encounter");
         when(eventRecordServiceHelper.getEventRecordsAfterUuid("lastReadUuid")).thenReturn(Collections.singletonList(eventRecord));
-        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedSyncStrategy);
         when(encounterService.getEncounterByUuid(anyString())).thenReturn(encounter);
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
         List<EventLog> eventLogs = controller.getEventLogsAfter("lastReadUuid");
@@ -126,7 +126,7 @@ public class EventLogFilterControllerTest {
         addressHierarchyEntry.setLevel(ahl);
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
-        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedSyncStrategy);
         when(addressHierarchyService.getAddressHierarchyEntryByUuid(anyString())).thenReturn(addressHierarchyEntry);
         List<EventLog> eventLogs = controller.getEventLogsAfter("lastReadUuid");
         assertEquals(eventLogs.size(), 1);
@@ -136,7 +136,7 @@ public class EventLogFilterControllerTest {
 
     @Test
     public void shouldGetFilterForDevice() throws Exception {
-        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedSyncStrategy);
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getService(AddressHierarchyService.class)).thenReturn(addressHierarchyService);
         AddressHierarchyEntry addressHierarchyEntry = new AddressHierarchyEntry();
@@ -161,7 +161,7 @@ public class EventLogFilterControllerTest {
 
     @Test
     public void shouldGetCategoryList() throws Exception {
-        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedOfflineSyncStrategy);
+        when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedSyncStrategy);
 
         List<String> categories = controller.getCategoryList();
         assertTrue(categories.contains("transactionalData"));

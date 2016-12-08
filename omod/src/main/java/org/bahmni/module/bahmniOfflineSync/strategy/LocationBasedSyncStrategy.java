@@ -6,21 +6,21 @@ import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
+import org.springframework.util.StringUtils;
 
+import java.sql.SQLException;
 import java.util.*;
 
-public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncStrategy {
-
+public class LocationBasedSyncStrategy extends AbstractOfflineSyncStrategy {
     private static final String ATTRIBUTE_TYPE_NAME = "addressCode";
 
-    public SimpleLocationBasedOfflineSyncStrategy() {
-        this.patientService = Context.getPatientService();
-        this.encounterService = Context.getEncounterService();
-        this.locationService = Context.getLocationService();
-        this.conceptService = Context.getConceptService();
+
+    public LocationBasedSyncStrategy() throws SQLException {
+        super();
+
     }
 
-    protected String evaluateFilterForPatient(String uuid) {
+     protected String evaluateFilterForPatient(String uuid) {
         String patientFilter = "";
         Patient patient = patientService.getPatientByUuid(uuid);
 
@@ -40,9 +40,13 @@ public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncS
     }
 
     private String evaluateFilterForAddressHierarchy(String uuid) {
+        String addressHierarchyFilter = "";
         AddressHierarchyService addressHierarchyService = Context.getService(AddressHierarchyService.class);
         AddressHierarchyEntry addressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntryByUuid(uuid);
-        return addressHierarchyEntry.getUserGeneratedId();
+        if (addressHierarchyEntry != null && addressHierarchyEntry.getLevel() != null && addressHierarchyEntry.getLevel().getId() > 3) {
+            addressHierarchyFilter = addressHierarchyEntry.getUserGeneratedId();
+        }
+        return addressHierarchyFilter;
     }
 
 
@@ -50,36 +54,56 @@ public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncS
         Map<String, List<String>> categoryFilterMap = new HashMap();
         AddressHierarchyService addressHierarchyService = Context.getService(AddressHierarchyService.class);
         AddressHierarchyEntry addressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntryByUuid(addressUuid);
-        List transactionalDataFilters = getTransactionalDataFilters(addressHierarchyService, addressHierarchyEntry);
+        List transactionalDataFilters = getTransactionalDataFilters(loginLocationUuid, addressHierarchyService, addressHierarchyEntry);
         categoryFilterMap.put("transactionalData", transactionalDataFilters);
-        categoryFilterMap.put("addressHierarchy", getFilters(addressHierarchyEntry));
+        categoryFilterMap.put("addressHierarchy", getFiltersForAddressHierarchy(addressHierarchyEntry));
+        categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         return categoryFilterMap;
     }
 
-    private List getTransactionalDataFilters( AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
+    private List getTransactionalDataFilters(String loginLocationUuid, AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
         List transactionalDataFilters = new ArrayList();
         if (addressHierarchyEntry != null) {
+            LocationAttributeType catchmentFiltersAttribute = locationService.getLocationAttributeTypeByName("catchmentFilters");
             String userGeneratedId = addressHierarchyEntry.getUserGeneratedId();
+            LocationAttribute catchmentFilters = getCatchmentFilters(loginLocationUuid, catchmentFiltersAttribute);
             List<AddressHierarchyEntry> childAddressHierarchyEntries = addressHierarchyService.getChildAddressHierarchyEntries(addressHierarchyEntry);
-            List<String> transactionalFilters = getCatchmentIds(childAddressHierarchyEntries, addressHierarchyService, addressHierarchyEntry);
+            List<String> transactionalFilters = getCatchmentIds(catchmentFilters, childAddressHierarchyEntries, addressHierarchyService, addressHierarchyEntry);
             transactionalDataFilters.add(userGeneratedId);
             transactionalDataFilters.addAll(transactionalFilters);
         }
         return transactionalDataFilters;
     }
 
-    private List<String> getCatchmentIds(List<AddressHierarchyEntry> childAddressHierarchyEntries, AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
-        List<String> wardIDs = new ArrayList();
-            updateWardIds(addressHierarchyService, wardIDs, childAddressHierarchyEntries);
-        return wardIDs;
+    private LocationAttribute getCatchmentFilters(String loginLocationUuid, LocationAttributeType catchmentFiltersAttribute) {
+        Location location = locationService.getLocationByUuid(loginLocationUuid);
+        List<LocationAttribute> attributes = (List<LocationAttribute>) location.getActiveAttributes();
+        for (LocationAttribute attribute : attributes) {
+            if (attribute.getAttributeType().equals(catchmentFiltersAttribute)) {
+                return attribute;
+            }
+        }
+        return null;
     }
 
-
-    private void updateWardIds(AddressHierarchyService addressHierarchyService, List<String> wardIDs, List<AddressHierarchyEntry> childAddressHierarchyEntries) {
-        for (AddressHierarchyEntry childAddressHierarchyEntry : childAddressHierarchyEntries) {
-            getAllWardIds(childAddressHierarchyEntry, addressHierarchyService, wardIDs);
+    private List<String> getCatchmentIds(LocationAttribute catchmentFilters, List<AddressHierarchyEntry> childAddressHierarchyEntries, AddressHierarchyService addressHierarchyService, AddressHierarchyEntry addressHierarchyEntry) {
+        List<String> wardIDs = new ArrayList();
+        if (catchmentFilters != null) {
+            String wardsName = trim(catchmentFilters.getValue().toString());
+            Set<String> wardsNameList = StringUtils.commaDelimitedListToSet(wardsName);
+            for (String wardName : wardsNameList) {
+                AddressHierarchyEntry childAddressHierarchyEntry = addressHierarchyService.getChildAddressHierarchyEntryByName(addressHierarchyEntry, wardName);
+                if (childAddressHierarchyEntry == null) {
+                    throw new RuntimeException("Please check your catchmentFilters configuration in openmrs!!");
+                } else {
+                    getAllWardIds(childAddressHierarchyEntry, addressHierarchyService, wardIDs);
+                }
+            }
+        } else {
+            updateWardIds(addressHierarchyService, wardIDs, childAddressHierarchyEntries);
         }
+        return wardIDs;
     }
 
     private void getAllWardIds(AddressHierarchyEntry addressHierarchyEntry, AddressHierarchyService addressHierarchyService, List<String> wardIDs) {
@@ -91,22 +115,41 @@ public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncS
         updateWardIds(addressHierarchyService, wardIDs, childAddressHierarchyEntries);
     }
 
-    private List getFilters(AddressHierarchyEntry addressHierarchyEntry) {
-        List transactionalDataFilters = new ArrayList();
-        if (addressHierarchyEntry != null) {
-            String userGeneratedId = addressHierarchyEntry.getUserGeneratedId();
-            transactionalDataFilters.add(userGeneratedId);
+    private void updateWardIds(AddressHierarchyService addressHierarchyService, List<String> wardIDs, List<AddressHierarchyEntry> childAddressHierarchyEntries) {
+        for (AddressHierarchyEntry childAddressHierarchyEntry : childAddressHierarchyEntries) {
+            getAllWardIds(childAddressHierarchyEntry, addressHierarchyService, wardIDs);
         }
-        return transactionalDataFilters;
+    }
+
+    private String trim(String content) {
+        content = content.trim();
+        return content.replaceAll("(\\s*,\\s*)", ",");
     }
 
     @Override
     public List<String> getEventCategoriesList() {
         List<String> eventCategoryList = new ArrayList();
+
         eventCategoryList.add("transactionalData");
         eventCategoryList.add("addressHierarchy");
+        eventCategoryList.add("parentAddressHierarchy");
         eventCategoryList.add("offline-concepts");
+
         return eventCategoryList;
+    }
+
+
+
+    private List<String> getFiltersForAddressHierarchy(AddressHierarchyEntry addressHierarchyEntry) {
+        List addressHierarchyFilters = new ArrayList();
+        while (addressHierarchyEntry.getParent() != null) {
+            if (addressHierarchyEntry.getUserGeneratedId().length() == 6) {
+                addressHierarchyFilters.add(addressHierarchyEntry.getUserGeneratedId());
+                break;
+            }
+            addressHierarchyEntry = addressHierarchyEntry.getParent();
+        }
+        return addressHierarchyFilters;
     }
 
     @Override
@@ -114,7 +157,7 @@ public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncS
         List<EventLog> eventLogs = new ArrayList<EventLog>();
 
         for (EventRecord er : eventRecords) {
-            EventLog eventLog = new EventLog(er.getUuid(), er.getCategory(), er.getTimeStamp(), er.getContents(), er.getUuid(), null);
+            EventLog eventLog = new EventLog(er.getUuid(),er.getCategory(),er.getTimeStamp(),er.getContents(), er.getUuid(), er.getUuid());
             String category = er.getCategory();
             String uuid = getUuidFromURL(er.getContents());
             String filter = "";
@@ -128,13 +171,11 @@ public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncS
                     }
                 }
 
-                if (category.equalsIgnoreCase("Patient") || category.equalsIgnoreCase("LabOrderResults"))
+                if (category.equalsIgnoreCase("Patient")|| category.equalsIgnoreCase("LabOrderResults"))
                     filter = evaluateFilterForPatient(uuid);
-                else if (category.equals("Encounter")) {
+                else if (category.equals("Encounter") || category.equals("SHREncounter"))
                     filter = evaluateFilterForEncounter(uuid);
-                    eventLog.setObject(String.format(encounterURL, uuid));
-                }
-                else if (category.equalsIgnoreCase("AddressHierarchy"))
+                else if (category.equalsIgnoreCase("addressHierarchy"))
                     filter = evaluateFilterForAddressHierarchy(uuid);
             }
             eventLog.setFilter(filter);
@@ -146,10 +187,10 @@ public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncS
     }
 
 
+
     private boolean isOfflineConceptEvent(String eventUuid) {
         final Concept concept = conceptService.getConceptByUuid(eventUuid);
         final Concept offlineConcept = conceptService.getConceptByName("Offline Concepts");
         return offlineConcept != null && offlineConcept.getSetMembers().contains(concept);
     }
-
 }

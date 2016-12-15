@@ -4,7 +4,7 @@
 
     <groupId>org.bahmni.module</groupId>
     <artifactId>bahmniOfflineSync</artifactId>
-    <version>0.87-SNAPSHOT</version>
+    <version>0.88-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Bahmni Offline Sync Module</name>
     <description>Workarounds for offline sync until concept attributes is developed. This module will then become
@@ -220,6 +220,13 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <extensions>
+           <extension>
+               <groupId>org.kuali.maven.wagons</groupId>
+               <artifactId>maven-s3-wagon</artifactId>
+               <version>1.2.1</version>
+           </extension>
+       </extensions>
     </build>
 
     <repositories>
@@ -271,18 +278,18 @@
             </snapshots>
         </repository>
         <repository>
-            <id>bahmni-artifactory</id>
-            <name>bahmni-artifactory-snapshots</name>
-            <url>http://bahmnirepo.thoughtworks.com/artifactory/libs-snapshot-local</url>
-            <snapshots>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>bahmni-artifactory-releases</id>
-            <name>bahmni-artifactory-releases</name>
-            <url>http://bahmnirepo.thoughtworks.com/artifactory/libs-release-local</url>
-        </repository>
+           <id>repo.mybahmni.org</id>
+           <name>bahmni-artifactory-snapshots</name>
+           <url>s3://repo.mybahmni.org/artifactory/snapshot</url>
+           <snapshots>
+               <updatePolicy>always</updatePolicy>
+           </snapshots>
+       </repository>
+       <repository>
+          <id>repo.mybahmni.org</id>
+          <name>bahmni-artifactory-release</name>
+          <url>s3://repo.mybahmni.org/artifactory/release</url>
+      </repository>
     </repositories>
 
     <pluginRepositories>

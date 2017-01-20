@@ -121,7 +121,7 @@ public class IDBasedSyncStrategyTest {
     }
 
     @Test
-    public void shouldReturnEmptyFilterIfEncounterUuidIsNull() throws Exception {
+    public void shouldReturnNullAsFilterIfEncounterUuidIsNull() throws Exception {
         PersonAttribute personAttribute = new PersonAttribute();
         personAttribute.setValue("Value");
         List<EventRecord> eventRecords = new ArrayList<EventRecord>();
@@ -130,7 +130,7 @@ public class IDBasedSyncStrategyTest {
         List<EventLog> eventLogs = idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(encounterService, times(1)).getEncounterByUuid(encounterUuid);
         assertEquals(eventRecords.size(), eventLogs.size());
-        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(null, eventLogs.get(0).getFilter());
         assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
 
         verify(patientService, never()).getPatientByUuid(patientUuid);

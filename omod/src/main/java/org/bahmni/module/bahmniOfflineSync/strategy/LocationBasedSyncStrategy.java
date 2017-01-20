@@ -21,7 +21,7 @@ public class LocationBasedSyncStrategy extends AbstractOfflineSyncStrategy {
     }
 
      protected String evaluateFilterForPatient(String uuid) {
-        String patientFilter = "";
+        String patientFilter = null;
         Patient patient = patientService.getPatientByUuid(uuid);
 
         if (patient != null && patient.getAttribute(ATTRIBUTE_TYPE_NAME) != null) {
@@ -32,7 +32,7 @@ public class LocationBasedSyncStrategy extends AbstractOfflineSyncStrategy {
     }
 
     private String evaluateFilterForEncounter(String uuid) {
-        String filter = "";
+        String filter = null;
         Encounter encounter = encounterService.getEncounterByUuid(uuid);
         if (encounter != null)
             filter = evaluateFilterForPatient(encounter.getPatient().getUuid());
@@ -40,7 +40,7 @@ public class LocationBasedSyncStrategy extends AbstractOfflineSyncStrategy {
     }
 
     private String evaluateFilterForAddressHierarchy(String uuid) {
-        String addressHierarchyFilter = "";
+        String addressHierarchyFilter = null;
         AddressHierarchyService addressHierarchyService = Context.getService(AddressHierarchyService.class);
         AddressHierarchyEntry addressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntryByUuid(uuid);
         if (addressHierarchyEntry != null && addressHierarchyEntry.getLevel() != null && addressHierarchyEntry.getLevel().getId() > 3) {

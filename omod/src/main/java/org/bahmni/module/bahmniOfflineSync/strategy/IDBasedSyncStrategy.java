@@ -73,7 +73,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
     }
 
     private String evaluateFilterForEncounter(String uuid) {
-        String filter = "";
+        String filter = null;
         Encounter encounter = encounterService.getEncounterByUuid(uuid);
 
         if (encounter != null)

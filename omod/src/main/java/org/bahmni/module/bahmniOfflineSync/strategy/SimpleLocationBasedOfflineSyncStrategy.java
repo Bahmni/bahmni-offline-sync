@@ -21,7 +21,7 @@ public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncS
     }
 
     protected String evaluateFilterForPatient(String uuid) {
-        String patientFilter = "";
+        String patientFilter = null;
         Patient patient = patientService.getPatientByUuid(uuid);
 
         if (patient != null && patient.getAttribute(ATTRIBUTE_TYPE_NAME) != null) {
@@ -32,7 +32,7 @@ public class SimpleLocationBasedOfflineSyncStrategy extends AbstractOfflineSyncS
     }
 
     private String evaluateFilterForEncounter(String uuid) {
-        String filter = "";
+        String filter = null;
         Encounter encounter = encounterService.getEncounterByUuid(uuid);
         if (encounter != null)
             filter = evaluateFilterForPatient(encounter.getPatient().getUuid());

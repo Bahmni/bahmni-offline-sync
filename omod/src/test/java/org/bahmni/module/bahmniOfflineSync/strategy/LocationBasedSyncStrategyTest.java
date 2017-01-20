@@ -100,7 +100,7 @@ public class LocationBasedSyncStrategyTest {
         eventRecords.add(er);
         List<EventLog> eventLogs = locationBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         assertEquals(eventRecords.size(), eventLogs.size());
-        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(null, eventLogs.get(0).getFilter());
         verify(addressHierarchyService, times(1)).getAddressHierarchyEntryByUuid(addressUuid);
         assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
     }
@@ -140,7 +140,7 @@ public class LocationBasedSyncStrategyTest {
         List<EventLog> eventLogs = locationBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(addressHierarchyService, times(1)).getAddressHierarchyEntryByUuid(addressUuid);
         assertEquals(eventRecords.size(), eventLogs.size());
-        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(null, eventLogs.get(0).getFilter());
         assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
     }
 
@@ -176,7 +176,7 @@ public class LocationBasedSyncStrategyTest {
     }
 
     @Test
-    public void shouldReturnEmptyFilterIfEncounterUuidIsNull() throws Exception {
+    public void shouldReturnNullAsFilterIfEncounterUuidIsNull() throws Exception {
         PersonAttribute personAttribute = new PersonAttribute();
         personAttribute.setValue("Value");
         List<EventRecord> eventRecords = new ArrayList<EventRecord>();
@@ -185,14 +185,14 @@ public class LocationBasedSyncStrategyTest {
         List<EventLog> eventLogs = locationBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(encounterService, times(1)).getEncounterByUuid(encounterUuid);
         assertEquals(eventRecords.size(), eventLogs.size());
-        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(null, eventLogs.get(0).getFilter());
         assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
 
         verify(patientService, never()).getPatientByUuid(patientUuid);
     }
 
     @Test
-    public void shouldReturnEmptyStringIfEncountersPatientAttributeIsNotAvailable() throws Exception {
+    public void shouldReturnNullAsStringIfEncountersPatientAttributeIsNotAvailable() throws Exception {
         Patient patient = new Patient();
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
         when(encounterService.getEncounterByUuid(encounterUuid)).thenReturn(encounter);
@@ -203,7 +203,7 @@ public class LocationBasedSyncStrategyTest {
         List<EventLog> eventLogs = locationBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(encounterService, times(1)).getEncounterByUuid(encounterUuid);
         assertEquals(eventRecords.size(), eventLogs.size());
-        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(null, eventLogs.get(0).getFilter());
         assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
 
         verify(patientService, times(1)).getPatientByUuid(anyString());
@@ -222,9 +222,8 @@ public class LocationBasedSyncStrategyTest {
         assertEquals("202020", eventLogs.get(0).getFilter());
     }
 
-
     @Test
-    public void shouldReturnEmptyStringIfAttributeIsNotAvailable() throws Exception {
+    public void shouldReturnNullAsFilterIfAttributeIsNotAvailable() throws Exception {
         when(patientService.getPatientByUuid(anyString())).thenReturn(new Patient());
         List<EventRecord> eventRecords = new ArrayList<EventRecord>();
         EventRecord er  = new EventRecord("uuid","patient","","url/" + patientUuid,new Date(),"Patient");
@@ -233,7 +232,7 @@ public class LocationBasedSyncStrategyTest {
         verify(patientService, times(1)).getPatientByUuid(patientUuid);
         assertEquals(eventRecords.size(), eventLogs.size());
         assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
-        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(null, eventLogs.get(0).getFilter());
     }
 
     @Test

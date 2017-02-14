@@ -1,17 +1,13 @@
 package org.bahmni.module.bahmniOfflineSync.utils;
 
+import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
 import org.ict4h.atomfeed.Configuration;
 import org.ict4h.atomfeed.jdbc.JdbcResultSetMapper;
 import org.ict4h.atomfeed.jdbc.JdbcUtils;
 import org.ict4h.atomfeed.server.domain.EventRecord;
-import org.ict4h.atomfeed.server.domain.EventRecordQueueItem;
 import org.ict4h.atomfeed.server.exceptions.AtomFeedRuntimeException;
-import org.ict4h.atomfeed.server.repository.AllEventRecordsQueue;
-import org.ict4h.atomfeed.server.repository.jdbc.AllEventRecordsQueueJdbcImpl;
-import org.ict4h.atomfeed.server.service.EventServiceImpl;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -131,4 +127,24 @@ public class EventRecordServiceHelper {
         }
         return events;
     }
+
+    public List<EventLog> getDistinctEventLogsByCategory(String category, String object) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<EventLog> events = new ArrayList<EventLog>();
+        Connection connection = null;
+        try {
+            connection = atomFeedSpringTransactionManager.getConnection();
+            String queryString = String.format("select * from event_log where category = '%s' group by %s", category, object);
+            stmt = connection.prepareStatement(queryString);
+            rs = stmt.executeQuery();
+            events =  (new JdbcResultSetMapper()).mapResultSetToObject(rs, EventLog.class);
+        } catch (SQLException var11) {
+            throw new AtomFeedRuntimeException(var11);
+        } finally {
+            this.closeAll(stmt, rs);
+        }
+        return events;
+    }
+
 }

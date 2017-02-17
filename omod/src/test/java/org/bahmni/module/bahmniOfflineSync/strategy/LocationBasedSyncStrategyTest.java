@@ -238,11 +238,12 @@ public class LocationBasedSyncStrategyTest {
     @Test
     public void shouldGetCategoryList() throws Exception {
         List<String> categories = locationBasedSyncStrategy.getEventCategoriesList();
-        assertTrue(categories.contains("transactionalData"));
+        assertTrue(categories.contains("patient"));
+        assertTrue(categories.contains("encounter"));
         assertTrue(categories.contains("addressHierarchy"));
         assertTrue(categories.contains("parentAddressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
-        assertTrue(categories.size() == 4);
+        assertTrue(categories.size() == 5);
     }
 
     @Test
@@ -280,7 +281,8 @@ public class LocationBasedSyncStrategyTest {
         transactionalDataFilters.add("20202002");
         ArrayList<String> addressHierarchyFilters = new ArrayList<String>();
         addressHierarchyFilters.add("202020");
-        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("patient", transactionalDataFilters);
+        categoryFilterMap.put("encounter", transactionalDataFilters);
         categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
         categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
@@ -328,7 +330,8 @@ public class LocationBasedSyncStrategyTest {
         transactionalDataFilters.add("20202002");
         ArrayList<String> addressHierarchyFilters = new ArrayList<String>();
         addressHierarchyFilters.add("202020");
-        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("patient", transactionalDataFilters);
+        categoryFilterMap.put("encounter", transactionalDataFilters);
         categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
         categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
@@ -380,7 +383,8 @@ public class LocationBasedSyncStrategyTest {
         transactionalDataFilters.add("20202002");
         ArrayList<String> addressHierarchyFilters = new ArrayList<String>();
         addressHierarchyFilters.add("202020");
-        categoryFilterMap.put("transactionalData", transactionalDataFilters);
+        categoryFilterMap.put("patient", transactionalDataFilters);
+        categoryFilterMap.put("encounter", transactionalDataFilters);
         categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
         categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());

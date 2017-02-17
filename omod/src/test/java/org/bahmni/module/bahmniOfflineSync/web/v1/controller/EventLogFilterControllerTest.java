@@ -151,7 +151,8 @@ public class EventLogFilterControllerTest {
         Map categoryFilterMap = new HashMap();
         ArrayList<String> filters = new ArrayList<String>();
         filters.add("202020");
-        categoryFilterMap.put("transactionalData", filters);
+        categoryFilterMap.put("patient", filters);
+        categoryFilterMap.put("encounter", filters);
         categoryFilterMap.put("addressHierarchy", filters);
         categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
@@ -164,11 +165,12 @@ public class EventLogFilterControllerTest {
         when(syncStrategyLoader.getFilterEvaluatorFromGlobalProperties()).thenReturn(locationBasedSyncStrategy);
 
         List<String> categories = controller.getCategoryList();
-        assertTrue(categories.contains("transactionalData"));
+        assertTrue(categories.contains("patient"));
+        assertTrue(categories.contains("encounter"));
         assertTrue(categories.contains("addressHierarchy"));
         assertTrue(categories.contains("parentAddressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
-        assertTrue(categories.size() == 4);
+        assertTrue(categories.size() == 5);
     }
 
 

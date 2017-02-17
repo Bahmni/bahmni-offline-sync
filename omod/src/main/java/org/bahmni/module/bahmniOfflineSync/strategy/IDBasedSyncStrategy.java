@@ -94,7 +94,8 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
             }
         }
 
-        categoryFilterMap.put("transactionalData", filters);
+        categoryFilterMap.put("patient", filters);
+        categoryFilterMap.put("encounter", filters);
         categoryFilterMap.put("addressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
 
@@ -105,7 +106,8 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
     public List<String> getEventCategoriesList() {
         List<String> eventCategoryList = new ArrayList();
 
-        eventCategoryList.add("transactionalData");
+        eventCategoryList.add("patient");
+        eventCategoryList.add("Encounter");
         eventCategoryList.add("addressHierarchy");
         eventCategoryList.add("offline-concepts");
 

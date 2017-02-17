@@ -40,6 +40,7 @@
         <openMRSWebServicesVersion>2.16</openMRSWebServicesVersion>
         <junitVersion>4.12</junitVersion>
         <powerMockVersion>1.6.5</powerMockVersion>
+        <emrapi-omod.version>1.20</emrapi-omod.version>
 
     </properties>
 
@@ -194,6 +195,19 @@
             <version>${serializationXstreamModuleVersion}</version>
             <scope>test</scope>
             </dependency>
+
+            <!-- emrapi -->
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>emrapi-api</artifactId>
+                <version>${emrapi-omod.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openmrs.module</groupId>
+                <artifactId>emrapi-omod</artifactId>
+                <version>${emrapi-omod.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

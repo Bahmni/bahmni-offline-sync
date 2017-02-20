@@ -1,8 +1,6 @@
 package org.bahmni.module.bahmniOfflineSync.web.v1.controller;
 
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
 import org.bahmni.module.bahmniOfflineSync.strategy.OfflineSyncStrategy;
 import org.bahmni.module.bahmniOfflineSync.strategy.SyncStrategyLoader;

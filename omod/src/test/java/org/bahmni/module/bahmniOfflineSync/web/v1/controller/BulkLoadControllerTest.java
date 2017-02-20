@@ -1,25 +1,27 @@
 package org.bahmni.module.bahmniOfflineSync.web.v1.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.webservices.rest.SimpleObject;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -28,6 +30,15 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class BulkLoadControllerTest {
     @Mock
     AdministrationService administrationService;
+
+    @Mock
+    HttpServletResponse httpServletResponse;
+
+    @Mock
+    ResourceLoader resourceLoader;
+
+    private File resultFile = null;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -37,37 +48,29 @@ public class BulkLoadControllerTest {
         PowerMockito.mockStatic(Context.class);
         when(Context.getAdministrationService()).thenReturn(administrationService);
 
-        SimpleObject patientProfile1 = new SimpleObject();
-        patientProfile1.add("uuid","uuid1")
-                        .add("patient", "blah...blah..blah");
-
-        SimpleObject patientProfile2 = new SimpleObject();
-        patientProfile2.add("uuid","uuid2")
-                .add("patient", "blah2...blah2..blah2");
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        File resultFile = new File("./patient/ABC.json");
-        FileUtils.writeStringToFile(resultFile,"");
-        objectMapper.writeValue(resultFile,Arrays.asList(patientProfile1, patientProfile2));
+        resultFile = new File("./patient/ABC.json");
+        FileUtils.writeStringToFile(resultFile, "blah..blah..blah..");
     }
 
     @After
-    public void tearDown(){
-        FileUtils.deleteQuietly(new File("./patient"));
+    public void tearDown() {
+        FileUtils.deleteQuietly(resultFile);
     }
 
     @Test
-    public void shouldRetrievePatientListFromPredefinedLocation() throws Exception {
+    public void shouldRetrieveCompressedPatientFileFromPredefinedLocation() throws Exception {
         when(administrationService.getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        when(resourceLoader.getResource("file:./patient/ABC.json")).thenReturn(new FileSystemResource(resultFile));
 
         BulkLoadController controller = new BulkLoadController();
-        List<SimpleObject> patientProfileList = controller.getPatientsInBulk("ABC");
-        assertNotNull(patientProfileList);
-        assertEquals(2,patientProfileList.size());
-        assertEquals("uuid1", patientProfileList.get(0).get("uuid"));
-        assertEquals("blah...blah..blah", patientProfileList.get(0).get("patient"));
-        assertEquals("uuid2", patientProfileList.get(1).get("uuid"));
-        assertEquals("blah2...blah2..blah2", patientProfileList.get(1).get("patient"));
+        controller.setResourceLoader(resourceLoader);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        controller.getPatientsInBulk(response, "ABC");
+
+        assertEquals("blah..blah..blah..", response.getContentAsString());
+        assertEquals("application/json", response.getContentType());
+        assertEquals("UTF-8", response.getCharacterEncoding());
+        assertEquals("gzip", response.getHeader("Content-Encoding"));
     }
 
     @Test
@@ -77,17 +80,8 @@ public class BulkLoadControllerTest {
         thrown.expect(APIException.class);
         thrown.expectMessage("Bulk patient file is not available at [./patient] for [ABCD]");
 
-        controller.getPatientsInBulk("ABCD");
+        controller.getPatientsInBulk(httpServletResponse, "ABCD");
     }
 
-    @Test
-    public void shouldThrowApiExceptionWhenThereIsAParsingError() throws Exception {
-        when(administrationService.getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
-        BulkLoadController controller = new BulkLoadController();
-        FileUtils.writeStringToFile(new File("./patient/ABC.json"),"");
-        thrown.expect(APIException.class);
-        thrown.expectMessage("Cannot parse the patient file at location [./patient/ABC.json]");
-
-        controller.getPatientsInBulk("ABC");
-    }
+    //TODO: Suman to write a testcase for testing IOException on REsourceLoader.getResource!!!
 }

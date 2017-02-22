@@ -140,7 +140,7 @@ public class IDBasedSyncStrategyTest {
     public void shouldGetCategoryList() throws Exception {
         List<String> categories = idBasedSyncStrategy.getEventCategoriesList();
         assertTrue(categories.contains("patient"));
-        assertTrue(categories.contains("Encounter"));
+        assertTrue(categories.contains("encounter"));
         assertTrue(categories.contains("addressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
         assertTrue(categories.size() == 4);

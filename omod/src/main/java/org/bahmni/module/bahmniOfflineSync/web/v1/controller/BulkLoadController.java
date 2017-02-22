@@ -35,7 +35,7 @@ public class BulkLoadController extends BaseRestController implements ResourceLo
     @ResponseBody
     public void getPatientsInBulk(HttpServletResponse response, @RequestParam(value = "filter") String filter) {
         String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(GP_BAHMNICONNECT_INIT_SYNC_PATH, DEFAULT_INIT_SYNC_PATH);
-        String filePath = String.format("%s/patient/%s.json", initSyncDirectory, filter);
+        String filePath = String.format("%s/patient/%s.json.gz", initSyncDirectory, filter);
         File initSyncFile = new File(filePath);
 
         if (!initSyncFile.exists()) {

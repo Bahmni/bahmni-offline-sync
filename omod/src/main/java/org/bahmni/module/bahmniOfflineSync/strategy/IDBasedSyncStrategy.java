@@ -107,7 +107,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
         List<String> eventCategoryList = new ArrayList();
 
         eventCategoryList.add("patient");
-        eventCategoryList.add("Encounter");
+        eventCategoryList.add("encounter");
         eventCategoryList.add("addressHierarchy");
         eventCategoryList.add("offline-concepts");
 
@@ -135,7 +135,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
 
                 if (category.equalsIgnoreCase("Patient") || category.equalsIgnoreCase("LabOrderResults"))
                     filter = evaluateFilterForPatient(uuid);
-                else if (category.equals("Encounter")) {
+                else if (category.equalsIgnoreCase("Encounter")) {
                     filter = evaluateFilterForEncounter(uuid);
                     eventLog.setObject(String.format(encounterURL,uuid));
                 }

@@ -48,7 +48,7 @@ public class BulkLoadControllerTest {
         PowerMockito.mockStatic(Context.class);
         when(Context.getAdministrationService()).thenReturn(administrationService);
 
-        resultFile = new File("./patient/ABC.json");
+        resultFile = new File("./patient/ABC.json.gz");
         FileUtils.writeStringToFile(resultFile, "blah..blah..blah..");
     }
 
@@ -60,7 +60,7 @@ public class BulkLoadControllerTest {
     @Test
     public void shouldRetrieveCompressedPatientFileFromPredefinedLocation() throws Exception {
         when(administrationService.getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
-        when(resourceLoader.getResource("file:./patient/ABC.json")).thenReturn(new FileSystemResource(resultFile));
+        when(resourceLoader.getResource("file:./patient/ABC.json.gz")).thenReturn(new FileSystemResource(resultFile));
 
         BulkLoadController controller = new BulkLoadController();
         controller.setResourceLoader(resourceLoader);

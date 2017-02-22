@@ -189,13 +189,6 @@
             <scope>test</scope>
             </dependency>
 
-            <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>serialization.xstream-api</artifactId>
-            <version>${serializationXstreamModuleVersion}</version>
-            <scope>test</scope>
-            </dependency>
-
             <!-- emrapi -->
             <dependency>
                 <groupId>org.openmrs.module</groupId>

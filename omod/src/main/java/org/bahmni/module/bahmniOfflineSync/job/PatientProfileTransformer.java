@@ -12,16 +12,16 @@ import java.util.regex.Pattern;
 
 public class PatientProfileTransformer implements RowTransformer {
     @Override
-    public SimpleObject transform(String key) {
+    public SimpleObject transform(String url) {
         PatientProfileResource patientProfileResource = (PatientProfileResource) Context.getService(RestService.class).getResourceBySupportedClass(PatientProfile.class);
-        String uuid = getUuidFromKey(key);
+        String uuid = getUuidFromUrl(url);
         SimpleObject profile = (SimpleObject) patientProfileResource.retrieve(uuid, null);
         return profile.get("patient");
     }
 
-    private String getUuidFromKey(String key) {
+    private String getUuidFromUrl(String url) {
         Pattern uuidPattern = Pattern.compile("([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
-        Matcher matcher = uuidPattern.matcher(key);
+        Matcher matcher = uuidPattern.matcher(url);
         return matcher.find() ? matcher.group(0) : "";
     }
 }

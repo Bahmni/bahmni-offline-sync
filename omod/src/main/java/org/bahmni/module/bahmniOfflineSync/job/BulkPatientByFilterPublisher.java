@@ -5,14 +5,9 @@ import org.bahmni.module.bahmniOfflineSync.utils.PatientProfileWriter;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
 import org.openmrs.module.webservices.rest.SimpleObject;
-import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.scheduler.tasks.AbstractTask;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.*;
 import java.sql.Connection;
@@ -24,8 +19,6 @@ import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 @Component("BulkPatientByFilterPublisher")
-@Controller
-@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/zip")
 public class BulkPatientByFilterPublisher extends AbstractTask {
 
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
@@ -35,7 +28,6 @@ public class BulkPatientByFilterPublisher extends AbstractTask {
 
     public BulkPatientByFilterPublisher() {
         atomFeedSpringTransactionManager = createTransactionManager();
-
     }
 
     private AtomFeedSpringTransactionManager createTransactionManager() {
@@ -81,8 +73,6 @@ public class BulkPatientByFilterPublisher extends AbstractTask {
     }
 
     @Override
-    @RequestMapping(method = RequestMethod.GET, value = "/test")
-    @ResponseBody
     public void execute() {
         String sql;
         String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(GP_BAHMNICONNECT_INIT_SYNC_PATH, DEFAULT_INIT_SYNC_PATH);
@@ -94,7 +84,7 @@ public class BulkPatientByFilterPublisher extends AbstractTask {
             String postText = "]}";
             for (String filter : filters) {
                 Connection connection = atomFeedSpringTransactionManager.getConnection();
-                sql = String.format("SELECT DISTINCT object FROM event_log WHERE filter='%s' and id <= %d and category = 'patient'", filter, lastEventId);
+                sql = getSql(lastEventId, filter);
                 PatientProfileWriter patientProfileWriter = getWriter(filter, initSyncDirectory);
                 patientProfileWriter.write(preText);
                 BulkEventLogProcessor bulkEventLogProcessor = new BulkEventLogProcessor(sql,
@@ -107,4 +97,11 @@ public class BulkPatientByFilterPublisher extends AbstractTask {
             e.printStackTrace();
         }
     }
+
+    private String getSql(Integer lastEventId, String filter) {
+        String template = "SELECT DISTINCT object FROM event_log WHERE filter='%s' and id <= %d and category = 'patient'";
+        String filterCondition = filter == null ? "filter is null" : String.format("filter = '%s'", filter);
+        return String.format(template, filterCondition, lastEventId);
+    }
+
 }

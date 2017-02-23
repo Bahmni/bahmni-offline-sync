@@ -1,6 +1,7 @@
 package org.bahmni.module.bahmniOfflineSync.web.v1.controller;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,13 +20,14 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
+import java.io.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@PrepareForTest({Context.class})
+@PrepareForTest({Context.class, IOUtils.class})
 @RunWith(PowerMockRunner.class)
 public class BulkLoadControllerTest {
     @Mock
@@ -83,5 +85,20 @@ public class BulkLoadControllerTest {
         controller.getPatientsInBulk(httpServletResponse, "ABCD");
     }
 
-    //TODO: Suman to write a testcase for testing IOException on REsourceLoader.getResource!!!
+    @Test
+    public void shouldThrowAPIExceptionWhenFileIsPresentButUnableToParseTheContent() throws Exception {
+        PowerMockito.mockStatic(IOUtils.class);
+        when(administrationService.getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        when(resourceLoader.getResource("file:./patient/ABC.json.gz")).thenReturn(new FileSystemResource(resultFile));
+        when(IOUtils.copy(any(InputStream.class), any(OutputStream.class))).thenThrow(new IOException());
+
+        BulkLoadController controller = new BulkLoadController();
+        controller.setResourceLoader(resourceLoader);
+
+        thrown.expect(APIException.class);
+        thrown.expectMessage("Cannot parse the patient file at location [./patient/ABC.json.gz]");
+
+        controller.getPatientsInBulk(httpServletResponse, "ABC");
+
+    }
 }

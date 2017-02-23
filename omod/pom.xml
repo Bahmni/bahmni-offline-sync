@@ -164,6 +164,12 @@
 			<version>1.2.4.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.codeartisans</groupId>
+			<artifactId>org.json</artifactId>
+			<version>20150729</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

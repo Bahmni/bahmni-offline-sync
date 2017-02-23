@@ -2,6 +2,7 @@ package org.bahmni.module.bahmniOfflineSync.job;
 
 import org.bahmni.module.bahmniOfflineSync.eventLog.BulkEventLogProcessor;
 import org.bahmni.module.bahmniOfflineSync.utils.PatientProfileWriter;
+import org.bahmni.module.bahmniOfflineSync.web.v1.controller.BulkLoadController;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -22,9 +23,6 @@ import java.util.zip.GZIPOutputStream;
 public class BulkPatientByFilterPublisher extends AbstractTask {
 
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
-
-    private static final String GP_BAHMNICONNECT_INIT_SYNC_PATH = "bahmniconnect.initsync.directory";
-    private static final String DEFAULT_INIT_SYNC_PATH = "/home/bahmni/init_sync";
 
     public BulkPatientByFilterPublisher() {
         atomFeedSpringTransactionManager = createTransactionManager();
@@ -75,7 +73,7 @@ public class BulkPatientByFilterPublisher extends AbstractTask {
     @Override
     public void execute() {
         String sql;
-        String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(GP_BAHMNICONNECT_INIT_SYNC_PATH, DEFAULT_INIT_SYNC_PATH);
+        String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH);
         try {
             SimpleObject lastEvent = getLastEvent();
             Integer lastEventId = new Integer(lastEvent.get("id"));
@@ -99,8 +97,8 @@ public class BulkPatientByFilterPublisher extends AbstractTask {
     }
 
     private String getSql(Integer lastEventId, String filter) {
-        String template = "SELECT DISTINCT object FROM event_log WHERE filter='%s' and id <= %d and category = 'patient'";
-        String filterCondition = filter == null ? "filter is null" : String.format("filter = '%s'", filter);
+        String template = "SELECT DISTINCT object FROM event_log WHERE %s and id <= %d and category = 'patient'";
+        String filterCondition = (filter == null) ? "filter is null" : String.format("filter = '%s'", filter);
         return String.format(template, filterCondition, lastEventId);
     }
 

@@ -20,7 +20,10 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;

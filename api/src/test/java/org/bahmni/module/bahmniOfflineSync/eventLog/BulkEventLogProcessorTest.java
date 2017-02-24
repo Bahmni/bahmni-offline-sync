@@ -1,54 +1,124 @@
-//package org.bahmni.module.bahmniOfflineSync.eventLog;
-//
-//import org.bahmni.module.bahmniOfflineSync.utils.PatientProfileWriter;
-//import org.junit.Before;
-//import org.junit.Test;
-//import org.openmrs.Person;
-//import org.openmrs.api.context.Context;
-//import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
-//import org.openmrs.module.webservices.rest.SimpleObject;
-//import org.openmrs.test.BaseModuleContextSensitiveTest;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.transaction.PlatformTransactionManager;
-//
-//import java.io.StringWriter;
-//import java.sql.Connection;
-//
-//import static org.junit.Assert.assertEquals;
-//
-//public class BulkEventLogProcessorTest extends BaseModuleContextSensitiveTest {
-//    @Autowired
-//    private PlatformTransactionManager platformTransactionManager;
-//
-//    private AtomFeedSpringTransactionManager transactionManager;
-//    private Connection connection;
-//
-//    @Before
-//    public void setUp() throws Exception {
-//        transactionManager = new AtomFeedSpringTransactionManager(platformTransactionManager);
-//        connection = transactionManager.getConnection();
-//    }
-//
-//    @Test
-//    public void shouldIterateThroughAllPatient() throws Exception {
-//        String sql = "select uuid from person";
-//        PatientProfileWriter writer = new PatientProfileWriter(new StringWriter());
-//        BulkEventLogProcessor bulkEventLogProcessor = new BulkEventLogProcessor(sql, connection, new PersonNameTransform(), writer);
-//        bulkEventLogProcessor.process();
-//        String expected = "{ given_name: Super, uuid: ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562},{ given_name: Horatio, uuid: da7f524f-27ce-4bb2-86d6-6d1d05312bd5},{ given_name: Johnny, uuid: a7e04421-525f-442f-8138-05b619d16def},{ given_name: Collet, uuid: 5946f880-b197-400b-9caa-a3c661d23041},{ given_name: Anet, uuid: 8adf539e-4b5a-47aa-80c0-ba1025c957fa},{ given_name: Jimmy, uuid: c04ee3c8-b68f-43cc-bff3-5a831ee7225f},{ given_name: , uuid: 29BF6F2B-0CE4-4CDB-A9BD-231E1B01C044},{ given_name: , uuid: BB3D4E98-1804-471E-B4B5-5180C1ECCEA0},{ given_name: , uuid: 86526ed6-3c11-11de-a0ba-001e378eb67f},{ given_name: Bruno, uuid: df8ae447-6745-45be-b859-403241d9913c},{ given_name: Hippocrates, uuid: 341b4e41-790c-484f-b6ed-71dc8da222de},{ given_name: , uuid: 86526ed6-3c11-11de-a0ba-001e378eb67e}";
-//        assertEquals(expected, writer.toString());
-//    }
-//
-//    class PersonNameTransform implements RowTransformer {
-//
-//        @Override
-//        public SimpleObject transform(String uuid) {
-//            Person person = Context.getPersonService().getPersonByUuid(uuid);
-//            SimpleObject simpleObject = new SimpleObject();
-//            simpleObject.put("given_name", person.getGivenName());
-//            simpleObject.put("uuid", uuid);
-////            return String.format("{ given_name: %s, uuid: %s}", person.getGivenName(), uuid);
-//            return simpleObject;
-//        }
-//    }
-//}
+package org.bahmni.module.bahmniOfflineSync.eventLog;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.bahmni.module.bahmniOfflineSync.utils.PatientProfileWriter;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.webservices.rest.SimpleObject;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.io.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.powermock.api.mockito.PowerMockito.when;
+
+@PrepareForTest({Context.class})
+@RunWith(PowerMockRunner.class)
+public class BulkEventLogProcessorTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Mock
+    private Connection connection;
+
+    @Mock
+    private PreparedStatement preparedStatement;
+
+    @Mock
+    ResultSet resultSet;
+
+    @Mock
+    PersonNameTransformer personNameTransformer;
+
+    private File resultFile;
+    private File directory;
+    private String sql;
+    private PatientProfileWriter writer;
+    private BulkEventLogProcessor bulkEventLogProcessor;
+
+    @Before
+    public void setUp() throws Exception {
+        directory = new File("./patient");
+        directory.mkdir();
+        initMocks(this);
+
+        SimpleObject person1 = new SimpleObject();
+        person1.put("given_name", "Super");
+        person1.put("uuid", "ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562");
+
+        SimpleObject person2 = new SimpleObject();
+        person2.put("given_name", "Horatio");
+        person2.put("uuid", "da7f524f-27ce-4bb2-86d6-6d1d05312bd5");
+
+        sql = "select uuid from person";
+
+        when(connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)).thenReturn(preparedStatement);
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
+        when(resultSet.getString(1)).thenReturn("ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562").thenReturn("da7f524f-27ce-4bb2-86d6-6d1d05312bd5");
+        when(personNameTransformer.transform("ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562")).thenReturn(person1);
+        when(personNameTransformer.transform("da7f524f-27ce-4bb2-86d6-6d1d05312bd5")).thenReturn(person2);
+
+        writer = getWriter("GAN", ".");
+        bulkEventLogProcessor = new BulkEventLogProcessor(sql, connection, personNameTransformer, writer);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        FileUtils.deleteQuietly(directory);
+    }
+
+    @Test
+    public void shouldIterateThroughAllPatient() throws Exception {
+        bulkEventLogProcessor.process();
+        String expected = "{\"given_name\":\"Super\",\"uuid\":\"ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562\"},{\"given_name\":\"Horatio\",\"uuid\":\"da7f524f-27ce-4bb2-86d6-6d1d05312bd5\"}";
+        assertEquals(expected, IOUtils.toString(new FileInputStream(resultFile)));
+    }
+
+    @Test
+    public void shouldThrowEventLogIteratorExceptionWhenSqlQueryHasAnyError() throws Exception {
+        when(connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)).thenThrow(new SQLException());
+
+        thrown.expect(EventLogIteratorException.class);
+        thrown.expectMessage("Error in setting up of SQL query");
+        bulkEventLogProcessor.process();
+    }
+
+    @Test
+    public void shouldThrowEventLogIteratorExceptionWhenUnableToWriteUsingGivenWriter() throws Exception {
+        writer.close();
+
+        thrown.expect(EventLogIteratorException.class);
+        thrown.expectMessage("Error while writing with provided writer");
+        bulkEventLogProcessor.process();
+
+    }
+
+    class PersonNameTransformer implements RowTransformer {
+        @Override
+        public SimpleObject transform(String uuid) {
+            return null;
+        }
+    }
+
+    private PatientProfileWriter getWriter(String filter, String initSyncDirectory) throws IOException {
+        String fileName = String.format("%s/patient/%s.json.gz", initSyncDirectory, filter);
+        resultFile = new File(fileName);
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultFile), "UTF-8"));
+        return (new PatientProfileWriter(bufferedWriter));
+    }
+}

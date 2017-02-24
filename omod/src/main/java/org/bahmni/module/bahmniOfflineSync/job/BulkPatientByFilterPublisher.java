@@ -39,6 +39,10 @@ public class BulkPatientByFilterPublisher extends AbstractTask {
     }
 
     private PatientProfileWriter getWriter(String filter, String initSyncDirectory) throws IOException {
+        File patientDirectory = new File(String.format("%s/patient", initSyncDirectory));
+        if (!patientDirectory.exists()) {
+            patientDirectory.mkdir();
+        }
         String fileName = String.format("%s/patient/%s.json.gz", initSyncDirectory, filter);
         GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(new File(fileName)));
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));

@@ -32,12 +32,7 @@ public class BulkPatientByFilterPublisherIT extends BaseModuleWebContextSensitiv
 
     @After
     public void tearDown() throws Exception {
-        File ganFile = new File(directory + "GAN.json.gz");
-        File semFile = new File(directory + "SEM.json.gz");
-        File nullFile = new File(directory + "null.json.gz");
-        FileUtils.deleteQuietly(ganFile);
-        FileUtils.deleteQuietly(semFile);
-        FileUtils.deleteQuietly(nullFile);
+        FileUtils.deleteQuietly(new File(directory));
     }
 
     @Test

@@ -32,7 +32,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 @PrepareForTest({Context.class, IOUtils.class})
 @RunWith(PowerMockRunner.class)
-public class BulkLoadControllerTest {
+public class InitialSyncArtifactControllerTest {
     @Mock
     AdministrationService administrationService;
 
@@ -64,13 +64,13 @@ public class BulkLoadControllerTest {
 
     @Test
     public void shouldRetrieveCompressedPatientFileFromPredefinedLocation() throws Exception {
-        when(administrationService.getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         when(resourceLoader.getResource("file:./patient/ABC.json.gz")).thenReturn(new FileSystemResource(resultFile));
 
-        BulkLoadController controller = new BulkLoadController();
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
         controller.setResourceLoader(resourceLoader);
         MockHttpServletResponse response = new MockHttpServletResponse();
-        controller.getPatientsInBulk(response, "ABC");
+        controller.getPatientsByFilter(response, "ABC");
 
         assertEquals("blah..blah..blah..", response.getContentAsString());
         assertEquals("application/json", response.getContentType());
@@ -80,28 +80,28 @@ public class BulkLoadControllerTest {
 
     @Test
     public void shouldThrowAPIExceptionWhenFileIsNotAvailableForFilter() {
-        when(administrationService.getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
-        BulkLoadController controller = new BulkLoadController();
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
         thrown.expect(APIException.class);
-        thrown.expectMessage("Bulk patient file is not available at [./patient] for [ABCD]");
+        thrown.expectMessage("File is not available at [./patient] for [ABCD]");
 
-        controller.getPatientsInBulk(httpServletResponse, "ABCD");
+        controller.getPatientsByFilter(httpServletResponse, "ABCD");
     }
 
     @Test
     public void shouldThrowAPIExceptionWhenFileIsPresentButUnableToParseTheContent() throws Exception {
         PowerMockito.mockStatic(IOUtils.class);
-        when(administrationService.getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         when(resourceLoader.getResource("file:./patient/ABC.json.gz")).thenReturn(new FileSystemResource(resultFile));
         when(IOUtils.copy(any(InputStream.class), any(OutputStream.class))).thenThrow(new IOException());
 
-        BulkLoadController controller = new BulkLoadController();
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
         controller.setResourceLoader(resourceLoader);
 
         thrown.expect(APIException.class);
         thrown.expectMessage("Cannot parse the patient file at location [./patient/ABC.json.gz]");
 
-        controller.getPatientsInBulk(httpServletResponse, "ABC");
+        controller.getPatientsByFilter(httpServletResponse, "ABC");
 
     }
 }

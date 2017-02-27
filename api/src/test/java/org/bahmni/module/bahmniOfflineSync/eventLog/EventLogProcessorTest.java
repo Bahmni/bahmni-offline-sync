@@ -27,7 +27,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 @PrepareForTest({Context.class})
 @RunWith(PowerMockRunner.class)
-public class BulkEventLogProcessorTest {
+public class EventLogProcessorTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -48,7 +48,7 @@ public class BulkEventLogProcessorTest {
     private File directory;
     private String sql;
     private PatientProfileWriter writer;
-    private BulkEventLogProcessor bulkEventLogProcessor;
+    private EventLogProcessor eventLogProcessor;
 
     @Before
     public void setUp() throws Exception {
@@ -74,7 +74,7 @@ public class BulkEventLogProcessorTest {
         when(personNameTransformer.transform("da7f524f-27ce-4bb2-86d6-6d1d05312bd5")).thenReturn(person2);
 
         writer = getWriter("GAN", ".");
-        bulkEventLogProcessor = new BulkEventLogProcessor(sql, connection, personNameTransformer, writer);
+        eventLogProcessor = new EventLogProcessor(sql, connection, personNameTransformer, writer);
     }
 
     @After
@@ -84,7 +84,7 @@ public class BulkEventLogProcessorTest {
 
     @Test
     public void shouldIterateThroughAllPatient() throws Exception {
-        bulkEventLogProcessor.process();
+        eventLogProcessor.process();
         String expected = "{\"given_name\":\"Super\",\"uuid\":\"ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562\"},{\"given_name\":\"Horatio\",\"uuid\":\"da7f524f-27ce-4bb2-86d6-6d1d05312bd5\"}";
         assertEquals(expected, IOUtils.toString(new FileInputStream(resultFile)));
     }
@@ -95,7 +95,7 @@ public class BulkEventLogProcessorTest {
 
         thrown.expect(EventLogIteratorException.class);
         thrown.expectMessage("Error in setting up of SQL query");
-        bulkEventLogProcessor.process();
+        eventLogProcessor.process();
     }
 
     @Test
@@ -104,7 +104,7 @@ public class BulkEventLogProcessorTest {
 
         thrown.expect(EventLogIteratorException.class);
         thrown.expectMessage("Error while writing with provided writer");
-        bulkEventLogProcessor.process();
+        eventLogProcessor.process();
 
     }
 

@@ -75,7 +75,7 @@
 	<globalProperty>
 		<property>bahmniconnect.initsync.directory</property>
 		<defaultValue>/home/bahmni/init_sync</defaultValue>
-		<description>Base directory for bulk content needed for connect app</description>
+		<description>Initial sync artifacts directory for connect app</description>
 	</globalProperty>
 
 </module>

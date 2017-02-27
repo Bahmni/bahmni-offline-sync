@@ -10,12 +10,13 @@ import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.zip.GZIPInputStream;
 
 import static org.h2.engine.Constants.UTF8;
 import static org.junit.Assert.assertEquals;
 
-public class BulkPatientByFilterPublisherIT extends BaseModuleWebContextSensitiveTest {
+public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensitiveTest {
 
     private String directory = "src/test/resources/patient/";
 
@@ -37,8 +38,8 @@ public class BulkPatientByFilterPublisherIT extends BaseModuleWebContextSensitiv
 
     @Test
     public void shouldCreateZipFileForEachFilter() throws Exception {
-        BulkPatientByFilterPublisher bulkPatientByFilterPublisher = new BulkPatientByFilterPublisher();
-        bulkPatientByFilterPublisher.execute();
+        InitialSyncArtifactsPublisher initialSyncArtifactsPublisher = new InitialSyncArtifactsPublisher();
+        initialSyncArtifactsPublisher.execute();
 
         File ganFile = new File(directory + "GAN.json.gz");
         Assert.assertTrue(ganFile.exists());

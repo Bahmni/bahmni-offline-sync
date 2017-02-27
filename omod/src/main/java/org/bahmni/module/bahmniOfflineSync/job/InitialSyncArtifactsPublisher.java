@@ -1,8 +1,10 @@
 package org.bahmni.module.bahmniOfflineSync.job;
 
-import org.bahmni.module.bahmniOfflineSync.eventLog.BulkEventLogProcessor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.bahmni.module.bahmniOfflineSync.eventLog.EventLogProcessor;
 import org.bahmni.module.bahmniOfflineSync.utils.PatientProfileWriter;
-import org.bahmni.module.bahmniOfflineSync.web.v1.controller.BulkLoadController;
+import org.bahmni.module.bahmniOfflineSync.web.v1.controller.InitialSyncArtifactController;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -19,12 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-@Component("BulkPatientByFilterPublisher")
-public class BulkPatientByFilterPublisher extends AbstractTask {
+@Component("InitialSyncArtifactsPublisher")
+public class InitialSyncArtifactsPublisher extends AbstractTask {
+    protected Log log = LogFactory.getLog(getClass());
 
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
 
-    public BulkPatientByFilterPublisher() {
+    public InitialSyncArtifactsPublisher() {
         atomFeedSpringTransactionManager = createTransactionManager();
     }
 
@@ -77,26 +80,38 @@ public class BulkPatientByFilterPublisher extends AbstractTask {
     @Override
     public void execute() {
         String sql;
-        String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(BulkLoadController.GP_BAHMNICONNECT_INIT_SYNC_PATH, BulkLoadController.DEFAULT_INIT_SYNC_PATH);
+        String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH);
         try {
+            log.debug("InitialSyncArtifactsPublisher job started");
+            createInitSyncDirectory(initSyncDirectory);
             SimpleObject lastEvent = getLastEvent();
             Integer lastEventId = new Integer(lastEvent.get("id"));
             List<String> filters = getAllFilters();
             String preText = String.format("{\"lastReadEventUuid\":\"%s\", \"patients\":[", lastEvent.get("uuid").toString());
             String postText = "]}";
             for (String filter : filters) {
+                log.debug(String.format("Creating zip file for %s is started", filter));
                 Connection connection = atomFeedSpringTransactionManager.getConnection();
                 sql = getSql(lastEventId, filter);
                 PatientProfileWriter patientProfileWriter = getWriter(filter, initSyncDirectory);
                 patientProfileWriter.write(preText);
-                BulkEventLogProcessor bulkEventLogProcessor = new BulkEventLogProcessor(sql,
+                EventLogProcessor eventLogProcessor = new EventLogProcessor(sql,
                         connection, new PatientProfileTransformer(), patientProfileWriter);
-                bulkEventLogProcessor.process();
+                eventLogProcessor.process();
                 patientProfileWriter.write(postText);
                 patientProfileWriter.close();
+                log.debug(String.format("Creating zip file for %s is successfully completed", filter));
             }
+            log.debug("InitialSyncArtifactsPublisher job completed");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void createInitSyncDirectory(String initSyncDirectory) {
+        File directory = new File(initSyncDirectory);
+        if(!directory.exists()){
+            directory.mkdirs();
         }
     }
 

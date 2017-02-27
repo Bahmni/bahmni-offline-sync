@@ -20,8 +20,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 @Controller
-@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/bulk")
-public class BulkLoadController extends BaseRestController implements ResourceLoaderAware {
+@RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/bahmniconnect")
+public class InitialSyncArtifactController extends BaseRestController implements ResourceLoaderAware {
 
     public static final String GP_BAHMNICONNECT_INIT_SYNC_PATH = "bahmniconnect.initsync.directory";
     public static final String DEFAULT_INIT_SYNC_PATH = "/home/bahmni/init_sync";
@@ -29,13 +29,13 @@ public class BulkLoadController extends BaseRestController implements ResourceLo
 
     @RequestMapping(method = RequestMethod.GET, value = "/patient", params = {"filter"})
     @ResponseBody
-    public void getPatientsInBulk(HttpServletResponse response, @RequestParam(value = "filter") String filter) {
+    public void getPatientsByFilter(HttpServletResponse response, @RequestParam(value = "filter") String filter) {
         String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(GP_BAHMNICONNECT_INIT_SYNC_PATH, DEFAULT_INIT_SYNC_PATH);
         String filePath = String.format("%s/patient/%s.json.gz", initSyncDirectory, filter);
         File initSyncFile = new File(filePath);
 
         if (!initSyncFile.exists()) {
-            throw new APIException("Bulk patient file is not available at [" + initSyncDirectory + "/patient] for [" + filter + "]");
+            throw new APIException("File is not available at [" + initSyncDirectory + "/patient] for [" + filter + "]");
         }
 
         try {

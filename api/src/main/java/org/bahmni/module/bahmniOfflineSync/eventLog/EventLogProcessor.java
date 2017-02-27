@@ -11,7 +11,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BulkEventLogProcessor {
+public class EventLogProcessor {
 
     protected Log log = LogFactory.getLog(getClass());
 
@@ -29,7 +29,7 @@ public class BulkEventLogProcessor {
 
     private static final int MAX_ROW_SIZE = 1000;
 
-    public BulkEventLogProcessor(String sql, Connection connection, RowTransformer rowTransformer, PatientProfileWriter writer) {
+    public EventLogProcessor(String sql, Connection connection, RowTransformer rowTransformer, PatientProfileWriter writer) {
         this.sql = sql;
         this.connection = connection;
         this.rowTransformer = rowTransformer;

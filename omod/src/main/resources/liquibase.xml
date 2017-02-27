@@ -59,4 +59,16 @@
             INSERT INTO event_records (uuid, title, timestamp, uri, object, category, date_created) (SELECT UUID(), 'Lab Order Results', now(), CONCAT('/openmrs/ws/rest/v1/bahmnicore/labOrderResults?patientUuid=', p.uuid), CONCAT('/openmrs/ws/rest/v1/bahmnicore/labOrderResults?patientUuid=', p.uuid), 'LabOrderResults', now() FROM person p, encounter e, encounter_type et WHERE p.person_id = e.patient_id AND e.encounter_type = et.encounter_type_id AND et.name = 'LAB_RESULT');
         </sql>
     </changeSet>
+
+    <changeSet id="scheduler-job-for-creating-patient-data" author="tw" context="rel3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config
+                where schedulable_class='org.bahmni.module.bahmniOfflineSync.job.InitialSyncArtifactsPublisher'
+            </sqlCheck>
+        </preConditions>
+        <comment>rel3</comment>
+        <sqlFile path="AddInitialSyncArtifactsPublisherScheduler.sql"/>
+    </changeSet>
+
 </databaseChangeLog>

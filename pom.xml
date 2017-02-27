@@ -30,7 +30,7 @@
     </modules>
 
     <properties>
-        <openMRSVersion>2.0.3</openMRSVersion>
+        <openMRSVersion>2.1.0-SNAPSHOT</openMRSVersion>
         <atomfeed.version>1.10.0-SNAPSHOT</atomfeed.version>
         <openmrsAtomfeedVersion>2.5.5-SNAPSHOT</openmrsAtomfeedVersion>
         <serializationXstreamModuleVersion>0.2.12</serializationXstreamModuleVersion>

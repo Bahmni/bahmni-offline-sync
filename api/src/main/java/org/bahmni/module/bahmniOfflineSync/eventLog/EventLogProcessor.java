@@ -27,8 +27,6 @@ public class EventLogProcessor {
 
     private PatientProfileWriter writer;
 
-    private static final int MAX_ROW_SIZE = 1000;
-
     public EventLogProcessor(String sql, Connection connection, RowTransformer rowTransformer, PatientProfileWriter writer) {
         this.sql = sql;
         this.connection = connection;
@@ -39,9 +37,7 @@ public class EventLogProcessor {
     public void process() {
         try {
             preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            preparedStatement.setFetchSize(MAX_ROW_SIZE);
             preparedStatement.setFetchDirection(ResultSet.FETCH_FORWARD);
-            preparedStatement.setMaxRows(MAX_ROW_SIZE);
             ResultSet resultSet = preparedStatement.executeQuery();
             handleWarnings(preparedStatement);
 

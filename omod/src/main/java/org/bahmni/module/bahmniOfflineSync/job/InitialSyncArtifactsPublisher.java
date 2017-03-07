@@ -82,7 +82,7 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
         String sql;
         String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH);
         try {
-            log.debug("InitialSyncArtifactsPublisher job started");
+            log.info("InitialSyncArtifactsPublisher job started");
             createInitSyncDirectory(initSyncDirectory);
             SimpleObject lastEvent = getLastEvent();
             Integer lastEventId = new Integer(lastEvent.get("id"));
@@ -90,7 +90,7 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
             String preText = String.format("{\"lastReadEventUuid\":\"%s\", \"patients\":[", lastEvent.get("uuid").toString());
             String postText = "]}";
             for (String filter : filters) {
-                log.debug(String.format("Creating zip file for %s is started", filter));
+                log.info(String.format("Creating zip file for %s is started", filter));
                 Connection connection = atomFeedSpringTransactionManager.getConnection();
                 sql = getSql(lastEventId, filter);
                 PatientProfileWriter patientProfileWriter = getWriter(filter, initSyncDirectory);
@@ -100,9 +100,9 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
                 eventLogProcessor.process();
                 patientProfileWriter.write(postText);
                 patientProfileWriter.close();
-                log.debug(String.format("Creating zip file for %s is successfully completed", filter));
+                log.info(String.format("Creating zip file for %s is successfully completed", filter));
             }
-            log.debug("InitialSyncArtifactsPublisher job completed");
+            log.info("InitialSyncArtifactsPublisher job completed");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }

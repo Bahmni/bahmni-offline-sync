@@ -67,7 +67,7 @@ public class EventLogProcessor {
     private void handleWarnings(PreparedStatement preparedStatement) throws SQLException {
         SQLWarning warningToLog = preparedStatement.getWarnings();
         while (warningToLog != null) {
-            log.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '"
+            log.info("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '"
                     + warningToLog.getErrorCode() + "', message [" + warningToLog.getMessage() + "]");
             warningToLog = warningToLog.getNextWarning();
         }

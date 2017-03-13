@@ -26,6 +26,7 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
     protected Log log = LogFactory.getLog(getClass());
 
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
+    protected static int JUMP_SIZE = 1000;
 
     public InitialSyncArtifactsPublisher() {
         atomFeedSpringTransactionManager = createTransactionManager();
@@ -41,12 +42,12 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
         return platformTransactionManagers.get(0);
     }
 
-    private PatientProfileWriter getWriter(String filter, String initSyncDirectory) throws IOException {
-        File patientDirectory = new File(String.format("%s/patient", initSyncDirectory));
+    private PatientProfileWriter getWriter(String name, String initSyncDirectory, String category) throws IOException {
+        File patientDirectory = new File(String.format("%s/%s", initSyncDirectory, category));
         if (!patientDirectory.exists()) {
             patientDirectory.mkdir();
         }
-        String fileName = String.format("%s/patient/%s.json.gz", initSyncDirectory, filter);
+        String fileName = String.format("%s/%s/%s.json.gz", initSyncDirectory, category, name);
         GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(new File(fileName)));
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));
         return (new PatientProfileWriter(bufferedWriter));
@@ -87,36 +88,58 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
             SimpleObject lastEvent = getLastEvent();
             Integer lastEventId = new Integer(lastEvent.get("id"));
             List<String> filters = getAllFilters();
-            String preText = String.format("{\"lastReadEventUuid\":\"%s\", \"patients\":[", lastEvent.get("uuid").toString());
+            String preTextTemplate = "{\"lastReadEventUuid\":\"%s\", \"patients\":[";
             String postText = "]}";
             for (String filter : filters) {
-                log.info(String.format("Creating zip file for %s is started", filter));
+                log.info(String.format("Creating zip files for %s is started", filter));
                 Connection connection = atomFeedSpringTransactionManager.getConnection();
                 sql = getSql(lastEventId, filter);
-                PatientProfileWriter patientProfileWriter = getWriter(filter, initSyncDirectory);
-                patientProfileWriter.write(preText);
-                EventLogProcessor eventLogProcessor = new EventLogProcessor(sql,
-                        connection, new PatientProfileTransformer(), patientProfileWriter);
-                eventLogProcessor.process();
-                patientProfileWriter.write(postText);
-                patientProfileWriter.close();
-                log.info(String.format("Creating zip file for %s is successfully completed", filter));
+
+                EventLogProcessor eventLogProcessor = new EventLogProcessor(sql, connection, new PatientProfileTransformer());
+                List<SimpleObject> urls = eventLogProcessor.getUrlObjects();
+
+                for (int index = 0; index < urls.size(); index += JUMP_SIZE) {
+                    String fileName = getFileName(filter, index);
+                    log.info(String.format("Creating zip file for %s is started", fileName));
+                    List<SimpleObject> subUrls = urls.subList(index, getUpperLimit(index, urls.size()));
+                    PatientProfileWriter patientProfileWriter = getWriter(fileName, initSyncDirectory, "patient");
+                    String lastEventUuid = (index + JUMP_SIZE < urls.size()) ?
+                            subUrls.get(subUrls.size() - 1).get("uuid").toString() : lastEvent.get("uuid").toString();
+                    String preText = String.format(preTextTemplate, lastEventUuid);
+                    patientProfileWriter.write(preText);
+                    eventLogProcessor.process(subUrls, patientProfileWriter);
+                    patientProfileWriter.write(postText);
+                    patientProfileWriter.close();
+                    Thread.sleep(1000);
+                    log.info(String.format("Creating zip file for %s is successfully completed", fileName));
+                }
+
+                log.info(String.format("Creating zip files for %s is successfully completed", filter));
             }
             log.info("InitialSyncArtifactsPublisher job completed");
-        } catch (SQLException | IOException e) {
+        } catch (SQLException | IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
+    private String getFileName(String filter, int index) {
+        return String.format("%s-%s", filter, (String.valueOf((index / JUMP_SIZE) + 1)));
+    }
+
+    private int getUpperLimit(int index, int size) {
+        int limit = index + JUMP_SIZE;
+        return size < limit ? size : limit;
+    }
+
     private void createInitSyncDirectory(String initSyncDirectory) {
         File directory = new File(initSyncDirectory);
-        if(!directory.exists()){
+        if (!directory.exists()) {
             directory.mkdirs();
         }
     }
 
     private String getSql(Integer lastEventId, String filter) {
-        String template = "SELECT DISTINCT object FROM event_log WHERE %s and id <= %d and category = 'patient'";
+        String template = "SELECT object, uuid FROM event_log WHERE %s and id <= %d and category = 'patient' GROUP BY object";
         String filterCondition = (filter == null) ? "filter is null" : String.format("filter = '%s'", filter);
         return String.format(template, filterCondition, lastEventId);
     }

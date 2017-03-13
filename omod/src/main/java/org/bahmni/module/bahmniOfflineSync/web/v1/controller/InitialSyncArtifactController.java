@@ -18,6 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/bahmniconnect")
@@ -27,15 +31,30 @@ public class InitialSyncArtifactController extends BaseRestController implements
     public static final String DEFAULT_INIT_SYNC_PATH = "/home/bahmni/init_sync";
     private ResourceLoader resourceLoader;
 
-    @RequestMapping(method = RequestMethod.GET, value = "/patient", params = {"filter"})
+    @RequestMapping(method = RequestMethod.GET, value = "/patientfiles", params = {"filter"})
     @ResponseBody
-    public void getPatientsByFilter(HttpServletResponse response, @RequestParam(value = "filter") String filter) {
+    public ArrayList<String> getFileNames(@RequestParam(value = "filter") String filter) {
         String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(GP_BAHMNICONNECT_INIT_SYNC_PATH, DEFAULT_INIT_SYNC_PATH);
-        String filePath = String.format("%s/patient/%s.json.gz", initSyncDirectory, filter);
+        File baseDirectory = new File(String.format("%s/patient", initSyncDirectory));
+        File[] files = baseDirectory.listFiles((dir, name) -> name.matches(String.format("%s-.*\\.json\\.gz", filter)));
+
+        if (files.length == 0) {
+            throw new APIException("File is not available at [" + initSyncDirectory + "/patient] for [" + filter + "]");
+        }
+
+        Arrays.sort(files, Comparator.comparingLong(File::lastModified));
+        return Arrays.stream(files).map(File::getName).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/patient", params = {"filename"})
+    @ResponseBody
+    public void getPatientsByFilter(HttpServletResponse response, @RequestParam(value = "filename") String filename) {
+        String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(GP_BAHMNICONNECT_INIT_SYNC_PATH, DEFAULT_INIT_SYNC_PATH);
+        String filePath = String.format("%s/patient/%s", initSyncDirectory, filename);
         File initSyncFile = new File(filePath);
 
         if (!initSyncFile.exists()) {
-            throw new APIException("File is not available at [" + initSyncDirectory + "/patient] for [" + filter + "]");
+            throw new APIException("File [" + filename + "] is not available at [" + initSyncDirectory + "/patient]");
         }
 
         try {
@@ -43,10 +62,10 @@ public class InitialSyncArtifactController extends BaseRestController implements
             IOUtils.copy(new FileInputStream(resource.getFile()), response.getOutputStream());
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.setHeader("Content-Encoding","gzip");
+            response.setHeader("Content-Encoding", "gzip");
             response.flushBuffer();
         } catch (IOException e) {
-            throw new APIException("Cannot parse the patient file at location [" + filePath + "]. Error ["+ e.getMessage()+"]", e);
+            throw new APIException("Cannot parse the patient file at location [" + filePath + "]. Error [" + e.getMessage() + "]", e);
         }
     }
 

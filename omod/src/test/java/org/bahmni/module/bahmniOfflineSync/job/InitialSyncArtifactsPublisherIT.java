@@ -10,7 +10,6 @@ import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.zip.GZIPInputStream;
 
 import static org.h2.engine.Constants.UTF8;
@@ -39,22 +38,30 @@ public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensiti
     @Test
     public void shouldCreateZipFileForEachFilter() throws Exception {
         InitialSyncArtifactsPublisher initialSyncArtifactsPublisher = new InitialSyncArtifactsPublisher();
+        InitialSyncArtifactsPublisher.JUMP_SIZE = 2;
         initialSyncArtifactsPublisher.execute();
 
-        File ganFile = new File(directory + "GAN.json.gz");
-        Assert.assertTrue(ganFile.exists());
-        File semFile = new File(directory + "SEM.json.gz");
+        File ganFile_1 = new File(directory + "GAN-1.json.gz");
+        Assert.assertTrue(ganFile_1.exists());
+        File ganFile_2 = new File(directory + "GAN-2.json.gz");
+        Assert.assertTrue(ganFile_2.exists());
+        File semFile = new File(directory + "SEM-1.json.gz");
         Assert.assertTrue(semFile.exists());
-        File nullFile = new File(directory + "null.json.gz");
+        File nullFile = new File(directory + "null-1.json.gz");
         Assert.assertTrue(nullFile.exists());
 
-        JSONObject ganList = unzip(ganFile);
-        JSONArray ganPatients = (JSONArray) ganList.get("patients");
-        assertEquals(3, (ganPatients).length());
-        assertEquals("ac46eca0-51d5-11e3-8f96-0800200c4a70", ganList.get("lastReadEventUuid"));
-        assertEquals("ca17fcc5-ec96-487f-b9ea-42973c8973e3", ((JSONObject) ganPatients.get(0)).getString("uuid"));
-        assertEquals("61b38324-e2fd-4feb-95b7-9e9a2a4400df", ((JSONObject) ganPatients.get(1)).getString("uuid"));
-        assertEquals("8d703ff2-c3e2-4070-9737-73e713d5a50d", ((JSONObject) ganPatients.get(2)).getString("uuid"));
+        JSONObject ganList_1 = unzip(ganFile_1);
+        JSONArray ganPatients_1 = (JSONArray) ganList_1.get("patients");
+        assertEquals(2, (ganPatients_1).length());
+        assertEquals("ac46eca0-51d5-11e3-8f96-0800200c9a66", ganList_1.get("lastReadEventUuid"));
+        assertEquals("ca17fcc5-ec96-487f-b9ea-42973c8973e3", ((JSONObject) ganPatients_1.get(0)).getString("uuid"));
+        assertEquals("61b38324-e2fd-4feb-95b7-9e9a2a4400df", ((JSONObject) ganPatients_1.get(1)).getString("uuid"));
+
+        JSONObject ganList_2 = unzip(ganFile_2);
+        JSONArray gan_2Patients = (JSONArray) ganList_2.get("patients");
+        assertEquals(1, (gan_2Patients).length());
+        assertEquals("ac46eca0-51d5-11e3-8f96-0800200c4a70", ganList_2.get("lastReadEventUuid"));
+        assertEquals("8d703ff2-c3e2-4070-9737-73e713d5a50d", ((JSONObject) gan_2Patients.get(0)).getString("uuid"));
 
 
         JSONObject semList = unzip(semFile);

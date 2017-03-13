@@ -25,40 +25,47 @@ public class EventLogProcessor {
 
     private RowTransformer rowTransformer;
 
-    private PatientProfileWriter writer;
-
-    public EventLogProcessor(String sql, Connection connection, RowTransformer rowTransformer, PatientProfileWriter writer) {
+    public EventLogProcessor(String sql, Connection connection, RowTransformer rowTransformer) {
         this.sql = sql;
         this.connection = connection;
         this.rowTransformer = rowTransformer;
-        this.writer = writer;
     }
 
-    public void process() {
+    public void process(List<SimpleObject> urls, PatientProfileWriter patientProfileWriter) {
+        try {
+            for (int index = 0; index < urls.size(); index++) {
+                SimpleObject event = urls.get(index);
+                SimpleObject simpleObject = rowTransformer.transform(event.get("object"));
+                if (index != 0) {
+                    patientProfileWriter.append(",");
+                }
+                patientProfileWriter.write(simpleObject);
+            }
+        } catch (IOException e) {
+            throw new EventLogIteratorException("Error while writing with provided writer [" + patientProfileWriter.toString() + "]", e);
+        }
+    }
+
+    public List<SimpleObject> getUrlObjects() {
         try {
             preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             preparedStatement.setFetchDirection(ResultSet.FETCH_FORWARD);
             ResultSet resultSet = preparedStatement.executeQuery();
             handleWarnings(preparedStatement);
 
-            List<String> urls = new ArrayList<>();
+            List<SimpleObject> urls = new ArrayList<>();
 
             while (resultSet.next()) {
-                urls.add((resultSet.getString(1)));
+                SimpleObject simpleObject = new SimpleObject();
+                simpleObject.add("object", resultSet.getString(1));
+                simpleObject.add("uuid", resultSet.getString(2));
+                urls.add(simpleObject);
             }
-            for (int index = 0; index < urls.size(); index++) {
-                String url = urls.get(index);
-                SimpleObject simpleObject = rowTransformer.transform(url);
-                if (index != 0) {
-                    writer.append(",");
-                }
-                writer.write(simpleObject);
-            }
+
+            return urls;
+
         } catch (SQLException e) {
-            clean();
             throw new EventLogIteratorException("Error in setting up of SQL query", e);
-        } catch (IOException e) {
-            throw new EventLogIteratorException("Error while writing with provided writer [" + writer.toString() + "]", e);
         } finally {
             clean();
         }

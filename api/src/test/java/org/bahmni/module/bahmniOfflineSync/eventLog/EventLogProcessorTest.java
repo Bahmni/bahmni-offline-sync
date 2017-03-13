@@ -74,7 +74,7 @@ public class EventLogProcessorTest {
         when(personNameTransformer.transform("da7f524f-27ce-4bb2-86d6-6d1d05312bd5")).thenReturn(person2);
 
         writer = getWriter("GAN", ".");
-        eventLogProcessor = new EventLogProcessor(sql, connection, personNameTransformer, writer);
+        eventLogProcessor = new EventLogProcessor(sql, connection, personNameTransformer);
     }
 
     @After
@@ -84,7 +84,7 @@ public class EventLogProcessorTest {
 
     @Test
     public void shouldIterateThroughAllPatient() throws Exception {
-        eventLogProcessor.process();
+        eventLogProcessor.process(eventLogProcessor.getUrlObjects(), writer);
         String expected = "{\"given_name\":\"Super\",\"uuid\":\"ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562\"},{\"given_name\":\"Horatio\",\"uuid\":\"da7f524f-27ce-4bb2-86d6-6d1d05312bd5\"}";
         assertEquals(expected, IOUtils.toString(new FileInputStream(resultFile)));
     }
@@ -95,7 +95,7 @@ public class EventLogProcessorTest {
 
         thrown.expect(EventLogIteratorException.class);
         thrown.expectMessage("Error in setting up of SQL query");
-        eventLogProcessor.process();
+        eventLogProcessor.process(eventLogProcessor.getUrlObjects(), writer);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class EventLogProcessorTest {
 
         thrown.expect(EventLogIteratorException.class);
         thrown.expectMessage("Error while writing with provided writer");
-        eventLogProcessor.process();
+        eventLogProcessor.process(eventLogProcessor.getUrlObjects(), writer);
 
     }
 

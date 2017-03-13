@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -59,7 +60,7 @@ public class InitialSyncArtifactControllerTest {
 
     @After
     public void tearDown() {
-        FileUtils.deleteQuietly(resultFile);
+        FileUtils.deleteQuietly(new File("./patient"));
     }
 
     @Test
@@ -70,7 +71,7 @@ public class InitialSyncArtifactControllerTest {
         InitialSyncArtifactController controller = new InitialSyncArtifactController();
         controller.setResourceLoader(resourceLoader);
         MockHttpServletResponse response = new MockHttpServletResponse();
-        controller.getPatientsByFilter(response, "ABC");
+        controller.getPatientsByFilter(response, "ABC.json.gz");
 
         assertEquals("blah..blah..blah..", response.getContentAsString());
         assertEquals("application/json", response.getContentType());
@@ -79,13 +80,36 @@ public class InitialSyncArtifactControllerTest {
     }
 
     @Test
+    public void shouldGiveAllTheFileNamesStartedWithGivenFilterSortByLastModifiedTime() throws Exception {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        (new File("./patient/ABC-1.json.gz")).createNewFile();
+        (new File("./patient/CDE-1.json.gz")).createNewFile();
+        (new File("./patient/ABC-2.json.gz")).createNewFile();
+
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getFileNames("ABC");
+        assertEquals(2, fileNames.size());
+        assertEquals(fileNames.get(0), "ABC-1.json.gz");
+        assertEquals(fileNames.get(1), "ABC-2.json.gz");
+    }
+
+    @Test
+    public void shouldThrowAPIExceptionWhenFilesAreNotAvailableForFilter() throws Exception {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        thrown.expect(APIException.class);
+        thrown.expectMessage("File is not available at [./patient] for [ABC]");
+        controller.getFileNames("ABC");
+    }
+
+    @Test
     public void shouldThrowAPIExceptionWhenFileIsNotAvailableForFilter() {
         when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         InitialSyncArtifactController controller = new InitialSyncArtifactController();
         thrown.expect(APIException.class);
-        thrown.expectMessage("File is not available at [./patient] for [ABCD]");
+        thrown.expectMessage("File [ABCD.json.gz] is not available at [./patient]");
 
-        controller.getPatientsByFilter(httpServletResponse, "ABCD");
+        controller.getPatientsByFilter(httpServletResponse, "ABCD.json.gz");
     }
 
     @Test
@@ -101,7 +125,7 @@ public class InitialSyncArtifactControllerTest {
         thrown.expect(APIException.class);
         thrown.expectMessage("Cannot parse the patient file at location [./patient/ABC.json.gz]");
 
-        controller.getPatientsByFilter(httpServletResponse, "ABC");
+        controller.getPatientsByFilter(httpServletResponse, "ABC.json.gz");
 
     }
 }

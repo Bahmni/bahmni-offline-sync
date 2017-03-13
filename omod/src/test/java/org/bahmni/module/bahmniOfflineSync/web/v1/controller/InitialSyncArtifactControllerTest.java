@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -89,8 +91,9 @@ public class InitialSyncArtifactControllerTest {
         InitialSyncArtifactController controller = new InitialSyncArtifactController();
         ArrayList<String> fileNames = controller.getFileNames("ABC");
         assertEquals(2, fileNames.size());
-        assertEquals(fileNames.get(0), "ABC-1.json.gz");
-        assertEquals(fileNames.get(1), "ABC-2.json.gz");
+        assertTrue(fileNames.contains("ABC-1.json.gz"));
+        assertTrue(fileNames.contains("ABC-2.json.gz"));
+        assertFalse(fileNames.contains("CDE-1.json.gz"));
     }
 
     @Test

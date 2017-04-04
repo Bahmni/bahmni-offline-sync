@@ -78,5 +78,11 @@
 		<description>Initial sync artifacts directory for connect app</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>allowMultipleLoginLocation</property>
+		<defaultValue>false</defaultValue>
+		<description>Allow Connect app to login via Multiple login locations</description>
+	</globalProperty>
+
 </module>
 

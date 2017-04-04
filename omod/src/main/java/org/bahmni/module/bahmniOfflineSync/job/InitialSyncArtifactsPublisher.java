@@ -54,7 +54,7 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
     }
 
     private List<String> getAllFilters() throws SQLException {
-        String queryString = "SELECT DISTINCT filter FROM event_log WHERE category='patient'";
+        String queryString = "SELECT DISTINCT filter FROM event_log WHERE category='patient' AND filter != '' and filter IS NOT NULL ";
         Connection connection = atomFeedSpringTransactionManager.getConnection();
 
         PreparedStatement preparedStatement = connection.prepareStatement(queryString);
@@ -139,9 +139,8 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
     }
 
     private String getSql(Integer lastEventId, String filter) {
-        String template = "SELECT object, uuid FROM event_log WHERE %s and id <= %d and category = 'patient' GROUP BY object";
-        String filterCondition = (filter == null) ? "filter is null" : String.format("filter = '%s'", filter);
-        return String.format(template, filterCondition, lastEventId);
+        String template = "SELECT object, uuid FROM event_log WHERE filter = '%s' and id <= %d and category = 'patient' GROUP BY object";
+        return String.format(template, filter, lastEventId);
     }
 
 }

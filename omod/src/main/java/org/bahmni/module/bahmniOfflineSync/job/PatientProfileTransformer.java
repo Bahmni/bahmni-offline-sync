@@ -15,13 +15,21 @@ public class PatientProfileTransformer implements RowTransformer {
     public SimpleObject transform(String url) {
         PatientProfileResource patientProfileResource = (PatientProfileResource) Context.getService(RestService.class).getResourceBySupportedClass(PatientProfile.class);
         String uuid = getUuidFromUrl(url);
-        SimpleObject profile = (SimpleObject) patientProfileResource.retrieve(uuid, null);
-        return profile.get("patient");
+        if (uuid == null) {
+            return null;
+        }
+        try {
+            SimpleObject profile = (SimpleObject) patientProfileResource.retrieve(uuid, null);
+            return profile.get("patient");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private String getUuidFromUrl(String url) {
         Pattern uuidPattern = Pattern.compile("([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
         Matcher matcher = uuidPattern.matcher(url);
-        return matcher.find() ? matcher.group(0) : "";
+        return matcher.find() ? matcher.group(0) : null;
     }
 }

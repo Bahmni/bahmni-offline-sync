@@ -14,6 +14,8 @@ import java.util.zip.GZIPInputStream;
 
 import static org.h2.engine.Constants.UTF8;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensitiveTest {
 
@@ -42,13 +44,15 @@ public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensiti
         initialSyncArtifactsPublisher.execute();
 
         File ganFile_1 = new File(directory + "GAN-1.json.gz");
-        Assert.assertTrue(ganFile_1.exists());
+        assertTrue(ganFile_1.exists());
         File ganFile_2 = new File(directory + "GAN-2.json.gz");
-        Assert.assertTrue(ganFile_2.exists());
+        assertTrue(ganFile_2.exists());
         File semFile = new File(directory + "SEM-1.json.gz");
-        Assert.assertTrue(semFile.exists());
+        assertTrue(semFile.exists());
         File nullFile = new File(directory + "null-1.json.gz");
-        Assert.assertTrue(nullFile.exists());
+        assertFalse(nullFile.exists());
+        File emptyFile = new File(directory + "-1.json.gz");
+        assertFalse(emptyFile.exists());
 
         JSONObject ganList_1 = unzip(ganFile_1);
         JSONArray ganPatients_1 = (JSONArray) ganList_1.get("patients");
@@ -60,30 +64,20 @@ public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensiti
         JSONObject ganList_2 = unzip(ganFile_2);
         JSONArray gan_2Patients = (JSONArray) ganList_2.get("patients");
         assertEquals(1, (gan_2Patients).length());
-        assertEquals("ac46eca0-51d5-11e3-8f96-0800200c4a70", ganList_2.get("lastReadEventUuid"));
+        assertEquals("ac46eca0-51d5-11e3-8f96-0800200c4a71", ganList_2.get("lastReadEventUuid"));
         assertEquals("8d703ff2-c3e2-4070-9737-73e713d5a50d", ((JSONObject) gan_2Patients.get(0)).getString("uuid"));
 
 
         JSONObject semList = unzip(semFile);
         JSONArray semPatients = (JSONArray) semList.get("patients");
         assertEquals(2, semPatients.length());
-        assertEquals("ac46eca0-51d5-11e3-8f96-0800200c4a70", semList.get("lastReadEventUuid"));
+        assertEquals("ac46eca0-51d5-11e3-8f96-0800200c4a71", semList.get("lastReadEventUuid"));
         assertEquals("5c521595-4e12-46b0-8248-b8f2d3697766", ((JSONObject) semPatients.get(0)).getString("uuid"));
         assertEquals("30e2aa2a-4ed1-415d-84c5-ba29016c14b7", ((JSONObject) semPatients.get(1)).getString("uuid"));
-
-        JSONObject list = unzip(nullFile);
-        JSONArray patients = (JSONArray) list.get("patients");
-        assertEquals(1, patients.length());
-        assertEquals("ac46eca0-51d5-11e3-8f96-0800200c4a70", list.get("lastReadEventUuid"));
-        assertEquals("256ccf6d-6b41-455c-9be2-51ff4386ae76", ((JSONObject) patients.get(0)).getString("uuid"));
-
     }
-
 
     private JSONObject unzip(File file) throws IOException {
         GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(file));
         return new JSONObject(org.apache.commons.io.IOUtils.toString(gzipInputStream));
     }
-
-
 }

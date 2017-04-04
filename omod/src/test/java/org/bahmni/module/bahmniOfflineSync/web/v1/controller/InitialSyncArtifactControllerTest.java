@@ -26,9 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -97,16 +95,26 @@ public class InitialSyncArtifactControllerTest {
     }
 
     @Test
-    public void shouldThrowAPIExceptionWhenFilesAreNotAvailableForFilter() throws Exception {
+    public void shouldGiveEmptyListWhenFilesAreNotAvailableForFilter() throws Exception {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getFileNames("ABC");
+        assertEquals(0, fileNames.size());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfBaseDirectoryIsEmpty() throws Exception {
+        FileUtils.cleanDirectory(new File("./patient"));
         when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         InitialSyncArtifactController controller = new InitialSyncArtifactController();
         thrown.expect(APIException.class);
         thrown.expectMessage("File is not available at [./patient] for [ABC]");
         controller.getFileNames("ABC");
+        fail();
     }
 
     @Test
-    public void shouldThrowAPIExceptionWhenFileIsNotAvailableForFilter() {
+    public void shouldThrowAPIExceptionWhenPatientFileIsNotAvailable() {
         when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         InitialSyncArtifactController controller = new InitialSyncArtifactController();
         thrown.expect(APIException.class);

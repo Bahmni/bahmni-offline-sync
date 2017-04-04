@@ -66,12 +66,15 @@ public class EventLogProcessorTest {
 
         sql = "select uuid from person";
 
-        when(connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)).thenReturn(preparedStatement);
+        when(connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY))
+                .thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
-        when(resultSet.getString(1)).thenReturn("ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562").thenReturn("da7f524f-27ce-4bb2-86d6-6d1d05312bd5");
+        when(resultSet.next()).thenReturn(true).thenReturn(true).thenReturn(true).thenReturn(false);
+        when(resultSet.getString(1)).thenReturn("ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562")
+                .thenReturn("da7f524f-27ce-4bb2-86d6-6d1d05312bd5").thenReturn("da7f524f-27ce-4bb2-86d6-6d1d05312bdx");
         when(personNameTransformer.transform("ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562")).thenReturn(person1);
         when(personNameTransformer.transform("da7f524f-27ce-4bb2-86d6-6d1d05312bd5")).thenReturn(person2);
+        when(personNameTransformer.transform("da7f524f-27ce-4bb2-86d6-6d1d05312bdx")).thenReturn(null);
 
         writer = getWriter("GAN", ".");
         eventLogProcessor = new EventLogProcessor(sql, connection, personNameTransformer);
@@ -85,13 +88,15 @@ public class EventLogProcessorTest {
     @Test
     public void shouldIterateThroughAllPatient() throws Exception {
         eventLogProcessor.process(eventLogProcessor.getUrlObjects(), writer);
-        String expected = "{\"given_name\":\"Super\",\"uuid\":\"ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562\"},{\"given_name\":\"Horatio\",\"uuid\":\"da7f524f-27ce-4bb2-86d6-6d1d05312bd5\"}";
+        String expected = "{\"given_name\":\"Super\",\"uuid\":\"ba1b19c2-3ed6-4f63-b8c0-f762dc8d7562\"}," +
+                "{\"given_name\":\"Horatio\",\"uuid\":\"da7f524f-27ce-4bb2-86d6-6d1d05312bd5\"}";
         assertEquals(expected, IOUtils.toString(new FileInputStream(resultFile)));
     }
 
     @Test
     public void shouldThrowEventLogIteratorExceptionWhenSqlQueryHasAnyError() throws Exception {
-        when(connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)).thenThrow(new SQLException());
+        when(connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY))
+                .thenThrow(new SQLException());
 
         thrown.expect(EventLogIteratorException.class);
         thrown.expectMessage("Error in setting up of SQL query");
@@ -118,7 +123,8 @@ public class EventLogProcessorTest {
     private PatientProfileWriter getWriter(String filter, String initSyncDirectory) throws IOException {
         String fileName = String.format("%s/patient/%s.json.gz", initSyncDirectory, filter);
         resultFile = new File(fileName);
-        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultFile), "UTF-8"));
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(resultFile), "UTF-8"));
         return (new PatientProfileWriter(bufferedWriter));
     }
 }

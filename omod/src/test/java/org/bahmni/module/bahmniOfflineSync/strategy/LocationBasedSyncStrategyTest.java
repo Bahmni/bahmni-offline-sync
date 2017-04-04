@@ -156,7 +156,7 @@ public class LocationBasedSyncStrategyTest {
         List<EventLog> eventLogs = locationBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(addressHierarchyService, times(0)).getAddressHierarchyEntryByUuid(addressUuid);
         assertEquals(eventRecords.size(), eventLogs.size());
-        assertEquals("", eventLogs.get(0).getFilter());
+        assertEquals(null, eventLogs.get(0).getFilter());
         assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
     }
 

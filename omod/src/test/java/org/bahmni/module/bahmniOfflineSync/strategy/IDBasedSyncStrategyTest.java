@@ -92,6 +92,17 @@ public class IDBasedSyncStrategyTest {
 
     }
 
+    @Test
+    public void shouldSetFilterAsNullIfUuidIsEmpty() throws Exception {
+        PowerMockito.mockStatic(Context.class);
+        List<EventRecord> eventRecords = new ArrayList<EventRecord>();
+        EventRecord er  = new EventRecord("uuid","address","","url/ff17adba-4870-462e-be29-e35091af9xde", new Date(),"patient");
+        eventRecords.add(er);
+        List<EventLog> eventLogs = idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        assertEquals(eventRecords.size(), eventLogs.size());
+        assertEquals(null, eventLogs.get(0).getFilter());
+        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
+    }
 
     @Test
     public void shouldNotSetFilterForAddressHierarchy() throws Exception {

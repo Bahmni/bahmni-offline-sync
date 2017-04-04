@@ -10,7 +10,7 @@
     <event_log id="2" timestamp="2004-08-12 00:00:00.1" filter="SEM"
                object="patient/5c521595-4e12-46b0-8248-b8f2d3697766" category="patient"
                uuid="ac46eca0-51d5-11e3-8f96-0800200c9a67"/>
-    <event_log id="3" timestamp="2004-08-12 00:00:00.2" filter="null"
+    <event_log id="3" timestamp="2004-08-12 00:00:00.2"
                object="patient/256ccf6d-6b41-455c-9be2-51ff4386ae76" category="patient"
                uuid="ac46eca0-51d5-11e3-8f96-0800200c9a68"/>
     <event_log id="4" timestamp="2004-08-12 00:00:00.3" filter="SEM"
@@ -25,6 +25,9 @@
     <event_log id="7" timestamp="2004-08-12 00:00:00.5" filter="GAN"
                object="encounter/ca17fcc5-ec96-487f-b9ea-42973c8973e3" category="encounter"
                uuid="ac46eca0-51d5-11e3-8f96-0800200c4a70"/>
+    <event_log id="8" timestamp="2004-08-12 00:00:00.5" filter=""
+               object="encounter/ca17fcc5-ec96-487f-b9ea-42973c8973e3" category="encounter"
+               uuid="ac46eca0-51d5-11e3-8f96-0800200c4a71"/>
 
     <location location_id="1" name="Test Location" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
               uuid="92ab9667-4686-49af-8be8-65a4b58fc49c"/>

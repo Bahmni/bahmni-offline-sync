@@ -119,7 +119,7 @@ public class SimpleLocationBasedSyncStrategy extends AbstractOfflineSyncStrategy
             EventLog eventLog = new EventLog(er.getUuid(), er.getCategory(), er.getTimeStamp(), er.getContents(), er.getUuid(), null);
             String category = er.getCategory();
             String uuid = getUuidFromURL(er.getContents());
-            String filter = "";
+            String filter = null;
 
             if (!uuid.isEmpty()) {
                 if (category.equalsIgnoreCase("all-concepts")) {

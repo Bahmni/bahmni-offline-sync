@@ -36,10 +36,12 @@ public class EventLogProcessor {
             for (int index = 0; index < urls.size(); index++) {
                 SimpleObject event = urls.get(index);
                 SimpleObject simpleObject = rowTransformer.transform(event.get("object"));
-                if (index != 0) {
-                    patientProfileWriter.append(",");
+                if (simpleObject != null) {
+                    if (index != 0) {
+                        patientProfileWriter.append(",");
+                    }
+                    patientProfileWriter.write(simpleObject);
                 }
-                patientProfileWriter.write(simpleObject);
             }
         } catch (IOException e) {
             throw new EventLogIteratorException("Error while writing with provided writer [" + patientProfileWriter.toString() + "]", e);

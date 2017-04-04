@@ -58,13 +58,13 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
     private PatientIdentifier getPatientIdentifier(Patient patient) {
         String identifierTypeName = "Patient Identifier";
         PatientIdentifier identifier = patient.getPatientIdentifier(identifierTypeName);
-        if(identifier == null){
+        if (identifier == null) {
             Set<PatientIdentifier> piList = patient.getIdentifiers();
-            for(PatientIdentifier pi : piList){
-                if(pi.getIdentifierType().getName().equals(identifierTypeName)){
-                    if(identifier == null)
+            for (PatientIdentifier pi : piList) {
+                if (pi.getIdentifierType().getName().equals(identifierTypeName)) {
+                    if (identifier == null)
                         identifier = pi;
-                    else if(pi.getDateCreated().after(identifier.getDateCreated()))
+                    else if (pi.getDateCreated().after(identifier.getDateCreated()))
                         identifier = pi;
                 }
             }
@@ -122,7 +122,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
             EventLog eventLog = new EventLog(er.getUuid(), er.getCategory(), er.getTimeStamp(), er.getContents(), null, er.getUuid());
             String category = er.getCategory();
             String uuid = getUuidFromURL(er.getContents());
-            String filter = "";
+            String filter = null;
 
             if (!uuid.isEmpty()) {
                 if ((category.equalsIgnoreCase("all-concepts"))) {
@@ -137,12 +137,11 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
                     filter = evaluateFilterForPatient(uuid);
                 else if (category.equalsIgnoreCase("Encounter")) {
                     filter = evaluateFilterForEncounter(uuid);
-                    eventLog.setObject(String.format(encounterURL,uuid));
-                }
-                else if (category.equalsIgnoreCase("addressHierarchy"))
+                    eventLog.setObject(String.format(encounterURL, uuid));
+                } else if (category.equalsIgnoreCase("addressHierarchy"))
                     filter = evaluateFilterForAddressHierarchy(uuid);
-                eventLog.setFilter(filter);
             }
+            eventLog.setFilter(filter);
 
             eventLogs.add(eventLog);
         }

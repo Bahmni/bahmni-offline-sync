@@ -46,8 +46,33 @@ public class PatientProfileTransformerTest {
         when(patientProfileResource.retrieve("83668ce6-c22b-416c-f5c5-d223375c7aea", null)).thenReturn(person);
 
         PatientProfileTransformer patientProfileTransformer = new PatientProfileTransformer();
-        SimpleObject patientProfile = patientProfileTransformer.transform("/openmrs/ws/rest/v1/patient/83668ce6-c22b-416c-f5c5-d223375c7aea?v=full");
+        SimpleObject patientProfile = patientProfileTransformer.transform(
+                "/openmrs/ws/rest/v1/patient/83668ce6-c22b-416c-f5c5-d223375c7aea?v=full");
         assertEquals(patient, patientProfile);
+    }
+
+    @Test
+    public void transform_shouldGiveNullObjectWhenPatientProfileThrowsException() throws Exception {
+
+        when(Context.getService(RestService.class)).thenReturn(restService);
+        when(restService.getResourceBySupportedClass(PatientProfile.class)).thenReturn(patientProfileResource);
+        when(patientProfileResource.retrieve("83668ce6-c22b-416c-f5c5-d223375c7aea", null)).thenThrow(NullPointerException.class);
+
+        PatientProfileTransformer patientProfileTransformer = new PatientProfileTransformer();
+        SimpleObject patientProfile = patientProfileTransformer.transform(
+                "/openmrs/ws/rest/v1/patient/83668ce6-c22b-416c-f5c5-d223375c7aea?v=full");
+        assertEquals(null, patientProfile);
+    }
+
+    @Test
+    public void transform_shouldGiveNullObjectWhenUuidDoesNotMatchGivenPattern() throws Exception {
+        when(Context.getService(RestService.class)).thenReturn(restService);
+        when(restService.getResourceBySupportedClass(PatientProfile.class)).thenReturn(patientProfileResource);
+
+        PatientProfileTransformer patientProfileTransformer = new PatientProfileTransformer();
+        SimpleObject patientProfile = patientProfileTransformer.transform(
+                "/openmrs/ws/rest/v1/patient/83668ce6-c22b-416c-f5c5-d223375c7axa?v=full");
+        assertEquals(null, patientProfile);
 
     }
 }

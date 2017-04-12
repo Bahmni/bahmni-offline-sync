@@ -1,5 +1,7 @@
 package org.bahmni.module.bahmniOfflineSync.strategy;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
 import org.ict4h.atomfeed.server.domain.EventRecord;
 import org.openmrs.*;
@@ -9,11 +11,14 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.IdentifierSource;
+import org.openmrs.module.idgen.SequentialIdentifierGenerator;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 
 import java.util.*;
 
 public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
+    private static Logger logger = Logger.getLogger(IDBasedSyncStrategy.class);
+
     private LocationService locationService;
 
     private PatientService patientService;
@@ -42,8 +47,14 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
             final List<IdentifierSource> identifierSources = identifierSourceService.getAllIdentifierSources(false);
 
             for (IdentifierSource src : identifierSources) {
-                if (identifier.getIdentifier().startsWith(src.getName())) {
-                    return src.getName();
+                String prefix = ((SequentialIdentifierGenerator) src).getPrefix();
+                if (StringUtils.isEmpty(prefix)) {
+                    RuntimeException exception = new RuntimeException("Please set prefix for " + src.getName());
+                    logger.error(exception);
+                    throw exception;
+                }
+                if (identifier.getIdentifier().startsWith(prefix)) {
+                    return prefix;
                 }
             }
         }

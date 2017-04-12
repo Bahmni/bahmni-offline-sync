@@ -15,7 +15,6 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressHierarchyEntry;
-import org.openmrs.module.idgen.BaseIdentifierSource;
 import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
@@ -26,8 +25,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -85,8 +83,9 @@ public class IDBasedSyncStrategyTest {
         patient.setIdentifiers(Collections.singleton(pi));
         addressHierarchyEntry = new AddressHierarchyEntry();
         addressHierarchyEntry.setUuid(addressUuid);
-        BaseIdentifierSource ganIdentifierSource = new SequentialIdentifierGenerator();
+        SequentialIdentifierGenerator ganIdentifierSource = new SequentialIdentifierGenerator();
         ganIdentifierSource.setName("GAN");
+        ganIdentifierSource.setPrefix("GAN");
         identifierSources = new ArrayList<IdentifierSource>();
         identifierSources.add(ganIdentifierSource);
 
@@ -145,6 +144,26 @@ public class IDBasedSyncStrategyTest {
         assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
 
         verify(patientService, never()).getPatientByUuid(patientUuid);
+    }
+
+    @Test
+    public void shouldThrowRuntimeExceptionIfPrefixIsNotConfiguredForIdentifierSourceName() throws Exception {
+        SequentialIdentifierGenerator ganIdentifierSource = new SequentialIdentifierGenerator();
+        ganIdentifierSource.setName("GAN");
+        ArrayList<IdentifierSource> identifierSources = new ArrayList<>();
+        identifierSources.add(ganIdentifierSource);
+
+        when(encounterService.getEncounterByUuid(encounterUuid)).thenReturn(encounter);
+        when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
+        when(identifierSourceService.getAllIdentifierSources(false)).thenReturn(identifierSources);
+        List<EventRecord> eventRecords = new ArrayList<>();
+        EventRecord er  = new EventRecord("uuid","Patient","","url/" + patientUuid,new Date(),"Patient");
+        eventRecords.add(er);
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Please set prefix for GAN");
+        idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        fail();
     }
 
     @Test

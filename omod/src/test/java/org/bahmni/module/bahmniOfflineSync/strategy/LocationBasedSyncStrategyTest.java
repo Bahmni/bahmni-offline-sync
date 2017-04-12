@@ -420,4 +420,9 @@ public class LocationBasedSyncStrategyTest {
         expectedException.expectMessage("Please check your catchmentFilters configuration in openmrs!!");
         locationBasedSyncStrategy.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
     }
+
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowRuntimeExceptionWhenAddressFieldIsNUll() throws Exception {
+        locationBasedSyncStrategy.getFilterForDevice("providerUuid", "null", "locationUuid");
+    }
 }

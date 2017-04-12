@@ -51,6 +51,9 @@ public class LocationBasedSyncStrategy extends AbstractOfflineSyncStrategy {
 
 
     public Map<String, List<String>> getFilterForDevice(String providerUuid, String addressUuid, String loginLocationUuid) {
+        if(addressUuid.equals("null") || addressUuid.isEmpty()) {
+            throw new RuntimeException("Please give address for this login location in openmrs");
+        }
         Map<String, List<String>> categoryFilterMap = new HashMap();
         AddressHierarchyService addressHierarchyService = Context.getService(AddressHierarchyService.class);
         AddressHierarchyEntry addressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntryByUuid(addressUuid);

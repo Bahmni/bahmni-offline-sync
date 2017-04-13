@@ -95,24 +95,24 @@ public class IDBasedSyncStrategyTest {
     public void shouldSetFilterAsNullIfUuidIsEmpty() throws Exception {
         PowerMockito.mockStatic(Context.class);
         List<EventRecord> eventRecords = new ArrayList<EventRecord>();
-        EventRecord er  = new EventRecord("uuid","address","","url/ff17adba-4870-462e-be29-e35091af9xde", new Date(),"patient");
+        EventRecord er = new EventRecord("uuid", "address", "", "url/ff17adba-4870-462e-be29-e35091af9xde", new Date(), "patient");
         eventRecords.add(er);
         List<EventLog> eventLogs = idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         assertEquals(eventRecords.size(), eventLogs.size());
         assertEquals(null, eventLogs.get(0).getFilter());
-        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
+        assertEquals(er.getCategory(), eventLogs.get(0).getCategory());
     }
 
     @Test
     public void shouldNotSetFilterForAddressHierarchy() throws Exception {
         PowerMockito.mockStatic(Context.class);
         List<EventRecord> eventRecords = new ArrayList<EventRecord>();
-        EventRecord er  = new EventRecord("uuid","address","","url/"+ addressUuid,new Date(),"addressHierarchy");
+        EventRecord er = new EventRecord("uuid", "address", "", "url/" + addressUuid, new Date(), "addressHierarchy");
         eventRecords.add(er);
         List<EventLog> eventLogs = idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         assertEquals(eventRecords.size(), eventLogs.size());
         assertEquals(null, eventLogs.get(0).getFilter());
-        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
+        assertEquals(er.getCategory(), eventLogs.get(0).getCategory());
     }
 
     @Test
@@ -121,13 +121,13 @@ public class IDBasedSyncStrategyTest {
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
         when(identifierSourceService.getAllIdentifierSources(false)).thenReturn(identifierSources);
         List<EventRecord> eventRecords = new ArrayList<EventRecord>();
-        EventRecord er  = new EventRecord("uuid","Encounter","","url/" + encounterUuid,new Date(),"Encounter");
+        EventRecord er = new EventRecord("uuid", "Encounter", "", "url/" + encounterUuid, new Date(), "Encounter");
         eventRecords.add(er);
         List<EventLog> eventLogs = idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(encounterService, times(1)).getEncounterByUuid(encounterUuid);
         assertEquals(eventRecords.size(), eventLogs.size());
         assertEquals("GAN", eventLogs.get(0).getFilter());
-        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
+        assertEquals(er.getCategory(), eventLogs.get(0).getCategory());
     }
 
     @Test
@@ -135,13 +135,13 @@ public class IDBasedSyncStrategyTest {
         PersonAttribute personAttribute = new PersonAttribute();
         personAttribute.setValue("Value");
         List<EventRecord> eventRecords = new ArrayList<EventRecord>();
-        EventRecord er  = new EventRecord("uuid","Encounter","","url/" + encounterUuid,new Date(),"Encounter");
+        EventRecord er = new EventRecord("uuid", "Encounter", "", "url/" + encounterUuid, new Date(), "Encounter");
         eventRecords.add(er);
         List<EventLog> eventLogs = idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         verify(encounterService, times(1)).getEncounterByUuid(encounterUuid);
         assertEquals(eventRecords.size(), eventLogs.size());
         assertEquals(null, eventLogs.get(0).getFilter());
-        assertEquals(er.getCategory(),eventLogs.get(0).getCategory());
+        assertEquals(er.getCategory(), eventLogs.get(0).getCategory());
 
         verify(patientService, never()).getPatientByUuid(patientUuid);
     }
@@ -157,13 +157,35 @@ public class IDBasedSyncStrategyTest {
         when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
         when(identifierSourceService.getAllIdentifierSources(false)).thenReturn(identifierSources);
         List<EventRecord> eventRecords = new ArrayList<>();
-        EventRecord er  = new EventRecord("uuid","Patient","","url/" + patientUuid,new Date(),"Patient");
+        EventRecord er = new EventRecord("uuid", "Patient", "", "url/" + patientUuid, new Date(), "Patient");
         eventRecords.add(er);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Please set prefix for GAN");
         idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
         fail();
+    }
+
+    @Test
+    public void shouldSetFilterAsNullIfPatientDoesNotHavePatientIdentifier() throws Exception {
+        Patient patient = new Patient();
+        patient.setUuid(patientUuid);
+        PatientIdentifierType pit = new PatientIdentifierType();
+        pit.setName("National Identifier");
+        PatientIdentifier pi = new PatientIdentifier();
+        pi.setIdentifierType(pit);
+        pi.setIdentifier("GAN");
+        patient.setIdentifiers(Collections.singleton(pi));
+
+        when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
+        List<EventRecord> eventRecords = new ArrayList<>();
+        EventRecord er = new EventRecord("uuid", "Patient", "", "url/" + patientUuid, new Date(), "Patient");
+        eventRecords.add(er);
+        List<EventLog> eventLogs = idBasedSyncStrategy.getEventLogsFromEventRecords(eventRecords);
+        verify(patientService, times(1)).getPatientByUuid(patientUuid);
+        verify(identifierSourceService, times(0)).getAllIdentifierSources(false);
+        assertEquals(1, eventLogs.size());
+        assertNull(eventLogs.get(0).getFilter());
     }
 
     @Test
@@ -177,7 +199,7 @@ public class IDBasedSyncStrategyTest {
     }
 
     @Test
-    public void shouldGetFilterForDevice(){
+    public void shouldGetFilterForDevice() {
         Location loginLocation = new Location();
         LocationAttribute locationAttribute = new LocationAttribute();
         LocationAttributeType locationAttributeType = new LocationAttributeType();
@@ -198,9 +220,5 @@ public class IDBasedSyncStrategyTest {
         categoryFilterMap.put("addressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
-
     }
-
-
-
 }

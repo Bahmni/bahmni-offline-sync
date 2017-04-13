@@ -44,6 +44,8 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
 
         if (patient != null) {
             PatientIdentifier identifier = getPatientIdentifier(patient);
+            if(identifier == null)
+                return null;
             final List<IdentifierSource> identifierSources = identifierSourceService.getAllIdentifierSources(false);
 
             for (IdentifierSource src : identifierSources) {

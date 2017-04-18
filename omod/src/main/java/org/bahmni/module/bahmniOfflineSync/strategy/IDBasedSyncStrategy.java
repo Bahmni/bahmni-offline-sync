@@ -44,7 +44,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
 
         if (patient != null) {
             PatientIdentifier identifier = getPatientIdentifier(patient);
-            if(identifier == null)
+            if (identifier == null)
                 return null;
             final List<IdentifierSource> identifierSources = identifierSourceService.getAllIdentifierSources(false);
 
@@ -103,7 +103,13 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
 
         for (LocationAttribute attr : activeAttributes) {
             if (attr.getAttributeType().getName().equals("IdentifierSourceName")) {
-                filters.add(attr.getValue().toString());
+                String prefix = getPrefixFor(attr.getValue().toString());
+                if (prefix == null) {
+                    RuntimeException exception = new RuntimeException("Please check [IdentifierSourceName] config for [" + location.getName() + "]");
+                    logger.error(exception);
+                    throw exception;
+                }
+                filters.add(prefix);
             }
         }
 
@@ -113,6 +119,15 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
 
         return categoryFilterMap;
+    }
+
+    private String getPrefixFor(String identifierSourceName) {
+        List<IdentifierSource> allIdentifierSources = identifierSourceService.getAllIdentifierSources(false);
+        for (IdentifierSource identifierSource : allIdentifierSources) {
+            if (identifierSource.getName().equals(identifierSourceName))
+                return ((SequentialIdentifierGenerator) identifierSource).getPrefix();
+        }
+        return null;
     }
 
     @Override

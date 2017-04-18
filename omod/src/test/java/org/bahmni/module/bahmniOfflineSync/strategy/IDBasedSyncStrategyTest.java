@@ -201,12 +201,21 @@ public class IDBasedSyncStrategyTest {
     @Test
     public void shouldGetFilterForDevice() {
         Location loginLocation = new Location();
+        loginLocation.setName("Test Login Location");
+
         LocationAttribute locationAttribute = new LocationAttribute();
         LocationAttributeType locationAttributeType = new LocationAttributeType();
         locationAttributeType.setName("IdentifierSourceName");
         locationAttribute.setAttributeType(locationAttributeType);
         loginLocation.setAttribute(locationAttribute);
         locationAttribute.setValue("GAN");
+        SequentialIdentifierGenerator ganIdentifierSource = new SequentialIdentifierGenerator();
+        ganIdentifierSource.setName("GAN");
+        ganIdentifierSource.setPrefix("GAN");
+        ArrayList<IdentifierSource> identifierSources = new ArrayList<>();
+        identifierSources.add(ganIdentifierSource);
+
+        when(identifierSourceService.getAllIdentifierSources(false)).thenReturn(identifierSources);
         when(locationService.getLocationByUuid(anyString())).thenReturn(loginLocation);
         when(locationService.getLocationAttributeTypeByName(anyString())).thenReturn(locationAttributeType);
 
@@ -220,5 +229,31 @@ public class IDBasedSyncStrategyTest {
         categoryFilterMap.put("addressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfIdentifierSourceNameConfigIsWrong() throws Exception {
+        Location loginLocation = new Location();
+        loginLocation.setName("Test Login Location");
+        LocationAttribute locationAttribute = new LocationAttribute();
+        LocationAttributeType locationAttributeType = new LocationAttributeType();
+        locationAttributeType.setName("IdentifierSourceName");
+        locationAttribute.setAttributeType(locationAttributeType);
+        loginLocation.setAttribute(locationAttribute);
+        locationAttribute.setValue("GAN");
+
+        SequentialIdentifierGenerator ganIdentifierSource = new SequentialIdentifierGenerator();
+        ganIdentifierSource.setName("BAH");
+        ganIdentifierSource.setPrefix("GAN");
+        ArrayList<IdentifierSource> identifierSources = new ArrayList<>();
+        identifierSources.add(ganIdentifierSource);
+
+        when(identifierSourceService.getAllIdentifierSources(false)).thenReturn(identifierSources);
+        when(locationService.getLocationByUuid(anyString())).thenReturn(loginLocation);
+        when(locationService.getLocationAttributeTypeByName(anyString())).thenReturn(locationAttributeType);
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Please check [IdentifierSourceName] config for [Test Login Location]");
+        idBasedSyncStrategy.getFilterForDevice("providerUuid", "addressUuid", "locationUuid");
     }
 }

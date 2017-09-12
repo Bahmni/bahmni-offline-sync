@@ -83,6 +83,13 @@
 		</dependency>
         <!-- End OpenMRS core -->
 
+		<dependency>
+			<groupId>org.bahmni.module</groupId>
+			<artifactId>bahmni.ie.apps-omod</artifactId>
+			<version>${bahmni.ie.apps}</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -41,7 +41,7 @@
         <junitVersion>4.12</junitVersion>
         <powerMockVersion>1.6.5</powerMockVersion>
         <emrapi-omod.version>1.20</emrapi-omod.version>
-
+        <bahmni.ie.apps>0.90-SNAPSHOT</bahmni.ie.apps>
     </properties>
 
     <dependencyManagement>
@@ -201,6 +201,13 @@
                 <artifactId>emrapi-omod</artifactId>
                 <version>${emrapi-omod.version}</version>
                 <scope>provided</scope>
+            </dependency>
+
+            <!-- Bahmni -->
+            <dependency>
+                <groupId>org.bahmni.module</groupId>
+                <artifactId>bahmni.ie.apps-omod</artifactId>
+                <version>${bahmni.ie.apps}</version>
             </dependency>
 
         </dependencies>

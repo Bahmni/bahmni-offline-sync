@@ -20,6 +20,7 @@
 		<require_module>org.openmrs.module.addresshierarchy</require_module>
 		<require_module>org.openmrs.module.idgen</require_module>
 		<require_module>org.openmrs.module.emrapi</require_module>
+		<require_module>org.bahmni.module.bahmni.ie.apps</require_module>
 	</require_modules>
 
 	<!-- / Module Properties -->
@@ -44,6 +45,10 @@
 		<class>org.bahmni.module.bahmniOfflineSync.advice.PatientSaveAdvice</class>
 	</advice>
 
+	<advice>
+		<point>org.openmrs.module.bahmni.ie.apps.service.BahmniFormService</point>
+		<class>org.bahmni.module.bahmniOfflineSync.advice.BahmniFormServiceInterceptor</class>
+	</advice>
 
 	<!-- Maps hibernate file's, if present -->
 	<mappingFiles>

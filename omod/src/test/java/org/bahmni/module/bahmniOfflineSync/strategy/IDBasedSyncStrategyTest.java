@@ -195,7 +195,8 @@ public class IDBasedSyncStrategyTest {
         assertTrue(categories.contains("encounter"));
         assertTrue(categories.contains("addressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
-        assertTrue(categories.size() == 4);
+        assertTrue(categories.contains("forms"));
+        assertTrue(categories.size() == 5);
     }
 
     @Test
@@ -228,6 +229,7 @@ public class IDBasedSyncStrategyTest {
         categoryFilterMap.put("encounter", transactionalDataFilters);
         categoryFilterMap.put("addressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        categoryFilterMap.put("forms", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
     }
 

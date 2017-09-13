@@ -55,6 +55,7 @@ public class SimpleLocationBasedSyncStrategy extends AbstractOfflineSyncStrategy
         categoryFilterMap.put("encounter", transactionalDataFilters);
         categoryFilterMap.put("addressHierarchy", getFilters(addressHierarchyEntry));
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        categoryFilterMap.put("forms", new ArrayList<>());
         return categoryFilterMap;
     }
 
@@ -108,6 +109,7 @@ public class SimpleLocationBasedSyncStrategy extends AbstractOfflineSyncStrategy
         eventCategoryList.add("encounter");
         eventCategoryList.add("addressHierarchy");
         eventCategoryList.add("offline-concepts");
+        eventCategoryList.add("forms");
         return eventCategoryList;
     }
 

@@ -63,6 +63,7 @@ public class LocationBasedSyncStrategy extends AbstractOfflineSyncStrategy {
         categoryFilterMap.put("addressHierarchy", getFiltersForAddressHierarchy(addressHierarchyEntry));
         categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        categoryFilterMap.put("forms", new ArrayList<>());
         return categoryFilterMap;
     }
 
@@ -139,6 +140,7 @@ public class LocationBasedSyncStrategy extends AbstractOfflineSyncStrategy {
         eventCategoryList.add("addressHierarchy");
         eventCategoryList.add("parentAddressHierarchy");
         eventCategoryList.add("offline-concepts");
+        eventCategoryList.add("forms");
 
         return eventCategoryList;
     }

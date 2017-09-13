@@ -243,7 +243,8 @@ public class LocationBasedSyncStrategyTest {
         assertTrue(categories.contains("addressHierarchy"));
         assertTrue(categories.contains("parentAddressHierarchy"));
         assertTrue(categories.contains("offline-concepts"));
-        assertTrue(categories.size() == 5);
+        assertTrue(categories.contains("forms"));
+        assertTrue(categories.size() == 6);
     }
 
     @Test
@@ -286,6 +287,7 @@ public class LocationBasedSyncStrategyTest {
         categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
         categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        categoryFilterMap.put("forms", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
     }
 
@@ -335,6 +337,7 @@ public class LocationBasedSyncStrategyTest {
         categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
         categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        categoryFilterMap.put("forms", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
     }
 
@@ -388,6 +391,7 @@ public class LocationBasedSyncStrategyTest {
         categoryFilterMap.put("addressHierarchy", addressHierarchyFilters);
         categoryFilterMap.put("parentAddressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        categoryFilterMap.put("forms", new ArrayList<String>());
         assertEquals(categoryFilterMap, markers);
     }
 

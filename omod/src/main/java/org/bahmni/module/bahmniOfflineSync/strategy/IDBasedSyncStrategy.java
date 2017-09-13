@@ -117,6 +117,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
         categoryFilterMap.put("encounter", filters);
         categoryFilterMap.put("addressHierarchy", new ArrayList<String>());
         categoryFilterMap.put("offline-concepts", new ArrayList<String>());
+        categoryFilterMap.put("forms", new ArrayList<>());
 
         return categoryFilterMap;
     }
@@ -138,6 +139,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
         eventCategoryList.add("encounter");
         eventCategoryList.add("addressHierarchy");
         eventCategoryList.add("offline-concepts");
+        eventCategoryList.add("forms");
 
         return eventCategoryList;
     }

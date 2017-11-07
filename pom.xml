@@ -32,7 +32,7 @@
     <properties>
         <openMRSVersion>2.0.3</openMRSVersion>
         <atomfeed.version>1.9.3</atomfeed.version>
-        <openmrsAtomfeedVersion>2.5.5-SNAPSHOT</openmrsAtomfeedVersion>
+        <openmrsAtomfeedVersion>2.5.5</openmrsAtomfeedVersion>
         <serializationXstreamModuleVersion>0.2.12</serializationXstreamModuleVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <addressHierarchyVersion>2.9</addressHierarchyVersion>

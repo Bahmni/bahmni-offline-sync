@@ -37,10 +37,6 @@ public class InitialSyncArtifactController extends BaseRestController implements
         String initSyncDirectory = Context.getAdministrationService().getGlobalProperty(GP_BAHMNICONNECT_INIT_SYNC_PATH, DEFAULT_INIT_SYNC_PATH);
         File baseDirectory = new File(String.format("%s/patient", initSyncDirectory));
 
-        if (baseDirectory.list().length == 0) {
-            throw new APIException("File is not available at [" + initSyncDirectory + "/patient] for [" + filter + "]");
-        }
-
         File[] files = baseDirectory.listFiles((dir, name) -> name.matches(String.format("%s-.*\\.json\\.gz", filter)));
 
         Arrays.sort(files, Comparator.comparingLong(File::lastModified));

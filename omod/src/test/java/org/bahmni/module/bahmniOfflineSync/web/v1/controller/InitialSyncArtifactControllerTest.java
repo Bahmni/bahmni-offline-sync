@@ -101,7 +101,16 @@ public class InitialSyncArtifactControllerTest {
         ArrayList<String> fileNames = controller.getFileNames("ABC");
         assertEquals(0, fileNames.size());
     }
-    
+
+    @Test
+    public void shouldNotThrowExceptionIfBaseDirectoryIsNotPresent() throws Exception {
+        FileUtils.cleanDirectory(new File("./patient"));
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn("./patient/not/present");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getFileNames("ABC");
+        assertEquals(0, fileNames.size());
+    }
+
     @Test
     public void shouldThrowAPIExceptionWhenPatientFileIsNotAvailable() {
         when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");

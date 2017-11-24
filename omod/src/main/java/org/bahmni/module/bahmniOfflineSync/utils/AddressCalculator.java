@@ -45,11 +45,14 @@ public class AddressCalculator {
         PersonAddress address = patient.getPersonAddress();
         String addressCode = "";
 
-        AddressHierarchyLevel addressHierarchyLevel = addressHierarchyService.getTopAddressHierarchyLevel();
-        String addressString = getAddressValueForLevel(addressHierarchyLevel.getLevelId(), address);
-        List<AddressHierarchyEntry> childAddressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntriesByLevelAndName(addressHierarchyLevel, addressString);
-        addressCode = getAddressCode(addressHierarchyLevel.getLevelId(),  childAddressHierarchyEntry.get(0), address);
-
+        if(address == null) {
+            addressCode = null;
+        } else {
+            AddressHierarchyLevel addressHierarchyLevel = addressHierarchyService.getTopAddressHierarchyLevel();
+            String addressString = getAddressValueForLevel(addressHierarchyLevel.getLevelId(), address);
+            List<AddressHierarchyEntry> childAddressHierarchyEntry = addressHierarchyService.getAddressHierarchyEntriesByLevelAndName(addressHierarchyLevel, addressString);
+            addressCode = getAddressCode(addressHierarchyLevel.getLevelId(), childAddressHierarchyEntry.get(0), address);
+        }
 
         PersonAttributeType type = personService.getPersonAttributeTypeByName("addressCode");
 

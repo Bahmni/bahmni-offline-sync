@@ -9,6 +9,8 @@ import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 
+import static org.junit.Assert.assertNull;
+
 public class AddressCalculatorIT extends BaseModuleWebContextSensitiveTest {
 
     @Before
@@ -42,6 +44,24 @@ public class AddressCalculatorIT extends BaseModuleWebContextSensitiveTest {
 
         addressCalculator.addTopDownAddressFor(patient);
         Assert.assertEquals(patient.getAttribute("addressCode").getValue(), "35");
+    }
+
+    @Test
+    public void shouldNotHaveAddressCodeAttributeIfThePatientDoesNotHaveAddress() {
+        AddressCalculator addressCalculator = new AddressCalculator();
+        Patient patient = new Patient();
+
+        addressCalculator.addTopDownAddressFor(patient);
+        assertNull(patient.getAttribute("addressCode"));
+    }
+
+    @Test
+    public void shouldNotHaveAddressCodeAttributeIfTheGivenCountryIsNotExistInDatabase() {
+        AddressCalculator addressCalculator = new AddressCalculator();
+        Patient patient = buildPatientWithAddress("randomText", "Telangana", "Secunderabad", "Gachibowli");
+
+        addressCalculator.addTopDownAddressFor(patient);
+        assertNull(patient.getAttribute("addressCode"));
     }
 
     private Patient buildPatientWithAddress(String country, String state, String city, String street) {

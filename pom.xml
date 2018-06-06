@@ -4,7 +4,7 @@
 
     <groupId>org.bahmni.module</groupId>
     <artifactId>bahmniOfflineSync</artifactId>
-    <version>0.91-SNAPSHOT</version>
+    <version>0.92-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Bahmni Offline Sync Module</name>
     <description>Workarounds for offline sync until concept attributes is developed. This module will then become
@@ -41,7 +41,7 @@
         <junitVersion>4.12</junitVersion>
         <powerMockVersion>1.6.5</powerMockVersion>
         <emrapi-omod.version>1.20</emrapi-omod.version>
-        <bahmni.ie.apps>0.91-SNAPSHOT</bahmni.ie.apps>
+        <bahmni.ie.apps>0.92-SNAPSHOT</bahmni.ie.apps>
     </properties>
 
     <dependencyManagement>

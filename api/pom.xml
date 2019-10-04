@@ -85,7 +85,7 @@
 
 		<dependency>
 			<groupId>org.bahmni.module</groupId>
-			<artifactId>bahmni.ie.apps-omod</artifactId>
+			<artifactId>bahmni.ie.apps-api</artifactId>
 			<version>${bahmni.ie.apps}</version>
 			<scope>provided</scope>
 		</dependency>

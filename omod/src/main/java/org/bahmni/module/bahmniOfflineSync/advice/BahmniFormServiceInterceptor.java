@@ -9,7 +9,7 @@ import org.ict4h.atomfeed.server.service.EventServiceImpl;
 import org.ict4h.atomfeed.transaction.AFTransactionWorkWithoutResult;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
-import org.openmrs.module.bahmni.ie.apps.model.BahmniForm;
+import org.bahmni.module.bahmni.ie.apps.model.BahmniForm;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.transaction.PlatformTransactionManager;
 

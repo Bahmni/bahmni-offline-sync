@@ -326,7 +326,7 @@
         <repository>
            <id>repo.mybahmni.org</id>
            <name>bahmni-artifactory-snapshots</name>
-           <url>s3://repo.mybahmni.org/artifactory/snapshot</url>
+           <url>http://repo.mybahmni.org/artifactory/snapshot</url>
            <snapshots>
                <updatePolicy>always</updatePolicy>
            </snapshots>
@@ -334,7 +334,7 @@
        <repository>
           <id>repo.mybahmni.org-release</id>
           <name>bahmni-artifactory-release</name>
-          <url>s3://repo.mybahmni.org/artifactory/release</url>
+          <url>http://repo.mybahmni.org/artifactory/release</url>
       </repository>
     </repositories>
 

@@ -1,6 +1,9 @@
 package org.bahmni.module.bahmniOfflineSync.strategy;
 
 import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.ict4h.atomfeed.server.domain.EventRecord;
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,6 +53,13 @@ public class IDBasedSyncStrategyTest {
     private PlatformTransactionManager platformTransactionManager;
     @Mock
     private LocationService locationService;
+    @Mock
+    private SessionFactory sessionFactory;
+    @Mock
+    Session session;
+    @Mock
+    Transaction transaction;
+
     private AddressHierarchyEntry addressHierarchyEntry;
     private Patient patient;
     Encounter encounter;
@@ -69,6 +79,11 @@ public class IDBasedSyncStrategyTest {
         List registeredComponents = new ArrayList();
         registeredComponents.add(platformTransactionManager);
         Mockito.when(Context.getRegisteredComponents(PlatformTransactionManager.class)).thenReturn(registeredComponents);
+        List sessionFactoryComponents = new ArrayList();
+        sessionFactoryComponents.add(sessionFactory);
+        Mockito.when(Context.getRegisteredComponents(SessionFactory.class)).thenReturn(sessionFactoryComponents);
+        Mockito.when(sessionFactory.getCurrentSession()).thenReturn(session);
+        Mockito.when(session.getTransaction()).thenReturn(transaction);
         idBasedSyncStrategy = new IDBasedSyncStrategy();
         patient = new Patient();
         patient.setUuid(patientUuid);
@@ -88,7 +103,6 @@ public class IDBasedSyncStrategyTest {
         ganIdentifierSource.setPrefix("GAN");
         identifierSources = new ArrayList<IdentifierSource>();
         identifierSources.add(ganIdentifierSource);
-
     }
 
     @Test

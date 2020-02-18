@@ -24,13 +24,7 @@ import java.util.List;
 
 @Service
 public class EventRecordServiceHelper {
-    private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
-
-
-    public EventRecordServiceHelper() {
-        atomFeedSpringTransactionManager = createTransactionManager();
-
-    }
+    private volatile AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
 
     private AtomFeedSpringTransactionManager createTransactionManager() {
         PlatformTransactionManager platformTransactionManager = getSpringPlatformTransactionManager();
@@ -58,7 +52,7 @@ public class EventRecordServiceHelper {
         List<EventRecord> events = new ArrayList<EventRecord>();
         Connection connection = null;
         try {
-            connection = atomFeedSpringTransactionManager.getConnection();
+            connection = getTransactionManager().getConnection();
             String queryString = String.format("select * from %s where uuid = ?", new Object[]{JdbcUtils.getTableName(Configuration.getInstance().getSchema(), "event_records")});
             stmt = connection.prepareStatement(queryString);
             stmt.setString(1, uuid);
@@ -79,7 +73,7 @@ public class EventRecordServiceHelper {
         Connection connection = null;
         List<EventRecord> events = new ArrayList<EventRecord>();
         try {
-            connection = atomFeedSpringTransactionManager.getConnection();
+            connection = getTransactionManager().getConnection();
             String queryString = String.format("select * from %s where id > ? order by id limit 1000 ", new Object[]{JdbcUtils.getTableName(Configuration.getInstance().getSchema(), "event_records")});
             stmt = connection.prepareStatement(queryString);
             stmt.setString(1, id.toString());
@@ -119,7 +113,7 @@ public class EventRecordServiceHelper {
         List<EventRecord> events = new ArrayList<EventRecord>();
         Connection connection = null;
         try {
-            connection = atomFeedSpringTransactionManager.getConnection();
+            connection = getTransactionManager().getConnection();
             String queryString = String.format("select * from %s order by id limit 1000 ", new Object[]{JdbcUtils.getTableName(Configuration.getInstance().getSchema(), "event_records")});
             stmt = connection.prepareStatement(queryString);
             rs = stmt.executeQuery();
@@ -130,5 +124,16 @@ public class EventRecordServiceHelper {
             this.closeAll(stmt, rs);
         }
         return events;
+    }
+
+    private AtomFeedSpringTransactionManager getTransactionManager() {
+        if (atomFeedSpringTransactionManager == null) {
+            synchronized (AtomFeedSpringTransactionManager .class) {
+                if (atomFeedSpringTransactionManager == null) {
+                    atomFeedSpringTransactionManager = createTransactionManager();
+                }
+            }
+        }
+        return atomFeedSpringTransactionManager;
     }
 }

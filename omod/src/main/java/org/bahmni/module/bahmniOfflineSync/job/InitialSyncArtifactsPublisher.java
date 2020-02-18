@@ -25,12 +25,9 @@ import java.util.zip.GZIPOutputStream;
 public class InitialSyncArtifactsPublisher extends AbstractTask {
     protected Log log = LogFactory.getLog(getClass());
 
-    private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
+    private volatile AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
     protected static int JUMP_SIZE = 1000;
 
-    public InitialSyncArtifactsPublisher() {
-        atomFeedSpringTransactionManager = createTransactionManager();
-    }
 
     private AtomFeedSpringTransactionManager createTransactionManager() {
         PlatformTransactionManager platformTransactionManager = getSpringPlatformTransactionManager();
@@ -55,7 +52,7 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
 
     private List<String> getAllFilters() throws SQLException {
         String queryString = "SELECT DISTINCT filter FROM event_log WHERE category='patient' AND filter != '' and filter IS NOT NULL ";
-        Connection connection = atomFeedSpringTransactionManager.getConnection();
+        Connection connection = getTransactionManager().getConnection();
 
         PreparedStatement preparedStatement = connection.prepareStatement(queryString);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -67,7 +64,7 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
     }
 
     private SimpleObject getLastEvent() throws SQLException {
-        Connection connection = atomFeedSpringTransactionManager.getConnection();
+        Connection connection = getTransactionManager().getConnection();
         SimpleObject event = new SimpleObject();
         String queryString = "SELECT id, uuid FROM event_log ORDER BY id DESC LIMIT 1";
         PreparedStatement preparedStatement = connection.prepareStatement(queryString);
@@ -92,7 +89,7 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
             String postText = "]}";
             for (String filter : filters) {
                 log.info(String.format("Creating zip files for %s is started", filter));
-                Connection connection = atomFeedSpringTransactionManager.getConnection();
+                Connection connection = getTransactionManager().getConnection();
                 sql = getSql(lastEventId, filter);
 
                 EventLogProcessor eventLogProcessor = new EventLogProcessor(sql, connection, new PatientProfileTransformer());
@@ -141,6 +138,17 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
     private String getSql(Integer lastEventId, String filter) {
         String template = "SELECT object, uuid FROM event_log WHERE filter = '%s' and id <= %d and category = 'patient' GROUP BY object";
         return String.format(template, filter, lastEventId);
+    }
+
+    private AtomFeedSpringTransactionManager getTransactionManager() {
+        if (atomFeedSpringTransactionManager == null) {
+            synchronized (AtomFeedSpringTransactionManager .class) {
+                if (atomFeedSpringTransactionManager == null) {
+                    atomFeedSpringTransactionManager = createTransactionManager();
+                }
+            }
+        }
+        return atomFeedSpringTransactionManager;
     }
 
 }

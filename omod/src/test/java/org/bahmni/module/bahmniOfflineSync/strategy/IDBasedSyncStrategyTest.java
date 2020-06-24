@@ -56,9 +56,9 @@ public class IDBasedSyncStrategyTest {
     @Mock
     private SessionFactory sessionFactory;
     @Mock
-    Session session;
+    private Session session;
     @Mock
-    Transaction transaction;
+    private Transaction transaction;
 
     private AddressHierarchyEntry addressHierarchyEntry;
     private Patient patient;

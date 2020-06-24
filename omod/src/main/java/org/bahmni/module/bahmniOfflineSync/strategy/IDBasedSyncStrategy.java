@@ -218,9 +218,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
                         pStmt = conn.prepareStatement(identifierPrefixQuery);
                         pStmt.setString(1, identifier);
                         ResultSet resultSet = pStmt.executeQuery();
-                        if(resultSet.next())
-                            return resultSet.getString(1);
-                        return null;
+                        return resultSet.next() ? resultSet.getString(1) : null;
                     }
                     finally {
                         pStmt.close();
@@ -232,7 +230,7 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
         }
         catch(HibernateException e) {
             RuntimeException exception = new RuntimeException("Error while executing query for getting local identifier [" + identifier + "]");
-            logger.error(exception);
+            logger.error(e, exception);
             throw exception;
         }
     }

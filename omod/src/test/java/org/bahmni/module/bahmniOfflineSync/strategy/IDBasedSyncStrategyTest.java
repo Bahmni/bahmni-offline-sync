@@ -79,7 +79,7 @@ public class IDBasedSyncStrategyTest {
         List registeredComponents = new ArrayList();
         registeredComponents.add(platformTransactionManager);
         Mockito.when(Context.getRegisteredComponents(PlatformTransactionManager.class)).thenReturn(registeredComponents);
-        List sessionFactoryComponents = new ArrayList();
+        List<SessionFactory> sessionFactoryComponents = new ArrayList<SessionFactory>();
         sessionFactoryComponents.add(sessionFactory);
         Mockito.when(Context.getRegisteredComponents(SessionFactory.class)).thenReturn(sessionFactoryComponents);
         Mockito.when(sessionFactory.getCurrentSession()).thenReturn(session);

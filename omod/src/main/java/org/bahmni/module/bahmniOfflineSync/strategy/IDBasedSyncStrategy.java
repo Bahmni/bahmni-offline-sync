@@ -3,6 +3,9 @@ package org.bahmni.module.bahmniOfflineSync.strategy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
 import org.ict4h.atomfeed.server.domain.EventRecord;
 import org.openmrs.*;
 import org.openmrs.api.ConceptService;
@@ -13,7 +16,12 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.SequentialIdentifierGenerator;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
+import org.hibernate.SessionFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
@@ -31,12 +39,21 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
 
     private String encounterURL = "/openmrs/ws/rest/v1/bahmnicore/bahmniencounter/%s?includeAll=true";
 
+    private SessionFactory sessionFactory;
+
+    private static String identifierPrefixQuery = "select distinct idgen_seq_id_gen.prefix from idgen_seq_id_gen join " +
+            " idgen_log_entry entry on idgen_seq_id_gen.id = entry.source and entry.identifier = ? " +
+            " join idgen_identifier_source src on src.id = entry.source and src.retired is not null";
+
     public IDBasedSyncStrategy() {
         this.patientService = Context.getPatientService();
         this.encounterService = Context.getEncounterService();
         this.locationService = Context.getLocationService();
         this.conceptService = Context.getConceptService();
         this.identifierSourceService = Context.getService(IdentifierSourceService.class);
+        List<SessionFactory> sessionFactories = Context.getRegisteredComponents(SessionFactory.class);
+        if(sessionFactories != null && sessionFactories.size() > 0)
+            this.sessionFactory = sessionFactories.get(0);
     }
 
     protected String evaluateFilterForPatient(String uuid) {
@@ -46,6 +63,9 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
             PatientIdentifier identifier = getPatientIdentifier(patient);
             if (identifier == null)
                 return null;
+            String localIdentifierPrefix = getFilterForLocalIdentifierSource(identifier.getIdentifier());
+            if(localIdentifierPrefix != null)
+                return localIdentifierPrefix;
             final List<IdentifierSource> identifierSources = identifierSourceService.getAllIdentifierSources(false);
 
             for (IdentifierSource src : identifierSources) {
@@ -183,5 +203,35 @@ public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
         final Concept concept = conceptService.getConceptByUuid(eventUuid);
         final Concept offlineConcept = conceptService.getConceptByName("Offline Concepts");
         return offlineConcept != null && offlineConcept.getSetMembers().contains(concept);
+    }
+
+    protected String getFilterForLocalIdentifierSource(String identifier) {
+        Session session = null;
+        try {
+            session = sessionFactory.getCurrentSession();
+            session.beginTransaction();
+            String prefix = session.doReturningWork(new ReturningWork<String>() {
+                @Override
+                public String execute(Connection conn) throws SQLException {
+                    PreparedStatement pStmt = null;
+                    try {
+                        pStmt = conn.prepareStatement(identifierPrefixQuery);
+                        pStmt.setString(1, identifier);
+                        ResultSet resultSet = pStmt.executeQuery();
+                        return resultSet.next() ? resultSet.getString(1) : null;
+                    }
+                    finally {
+                        pStmt.close();
+                    }
+                }
+            });
+            session.getTransaction().commit();
+            return prefix;
+        }
+        catch(HibernateException e) {
+            RuntimeException exception = new RuntimeException("Error while executing query for getting local identifier [" + identifier + "]");
+            logger.error(e, exception);
+            throw exception;
+        }
     }
 }

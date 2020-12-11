@@ -44,6 +44,8 @@ public class InitialSyncArtifactControllerTest {
     ResourceLoader resourceLoader;
 
     private File resultFile = null;
+    private File resultOfflineConceptFile = null;
+    private File resultAddressHierarchyFile = null;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -55,12 +57,18 @@ public class InitialSyncArtifactControllerTest {
         when(Context.getAdministrationService()).thenReturn(administrationService);
 
         resultFile = new File("./patient/ABC.json.gz");
+        resultOfflineConceptFile = new File("./offline-concepts/offline-concepts.json.gz");
+        resultAddressHierarchyFile = new File("./addressHierarchy/addressHierarchy.json.gz");
         FileUtils.writeStringToFile(resultFile, "blah..blah..blah..");
+        FileUtils.writeStringToFile(resultOfflineConceptFile, "blah..blah..blah..");
+        FileUtils.writeStringToFile(resultAddressHierarchyFile, "blah..blah..blah..");
     }
 
     @After
     public void tearDown() {
         FileUtils.deleteQuietly(new File("./patient"));
+        FileUtils.deleteQuietly(new File("./offline-concepts"));
+        FileUtils.deleteQuietly(new File("./addressHierarchy"));
     }
 
     @Test
@@ -81,6 +89,7 @@ public class InitialSyncArtifactControllerTest {
 
     @Test
     public void shouldGiveAllTheFileNamesStartedWithGivenFilterSortByLastModifiedTime() throws Exception {
+        FileUtils.cleanDirectory(new File("./patient"));
         when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         (new File("./patient/ABC-1.json.gz")).createNewFile();
         (new File("./patient/CDE-1.json.gz")).createNewFile();
@@ -96,6 +105,7 @@ public class InitialSyncArtifactControllerTest {
 
     @Test
     public void shouldGiveEmptyListWhenFilesAreNotAvailableForFilter() throws Exception {
+        FileUtils.cleanDirectory(new File("./patient"));
         when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         InitialSyncArtifactController controller = new InitialSyncArtifactController();
         ArrayList<String> fileNames = controller.getFileNames("ABC");
@@ -137,4 +147,155 @@ public class InitialSyncArtifactControllerTest {
         controller.getPatientsByFilter(httpServletResponse, "ABC.json.gz");
 
     }
+
+    @Test
+    public void shouldRetrieveCompressedOfflineConceptFileFromPredefinedLocation() throws Exception{
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        when(resourceLoader.getResource("file:./offline-concepts/offline-concepts.json.gz")).thenReturn(new FileSystemResource(resultOfflineConceptFile));
+
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        controller.setResourceLoader(resourceLoader);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        controller.getOfflineConceptsByFilter(response, "offline-concepts.json.gz");
+
+        assertEquals("blah..blah..blah..", response.getContentAsString());
+        assertEquals("application/json", response.getContentType());
+        assertEquals("UTF-8", response.getCharacterEncoding());
+        assertEquals("gzip", response.getHeader("Content-Encoding"));
+    }
+
+    @Test
+    public void shouldGiveAllOfflineFileNamesStartedWithGivenFilterSortByLastModifiedTime() throws Exception {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        (new File("./offline-concepts/ABC-1.json.gz")).createNewFile();
+        (new File("./offline-concepts/CDE-1.json.gz")).createNewFile();
+        (new File("./offline-concepts/ABC-2.json.gz")).createNewFile();
+
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getOfflineConceptFileNames("ABC");
+        assertEquals(2, fileNames.size());
+        assertTrue(fileNames.contains("ABC-1.json.gz"));
+        assertTrue(fileNames.contains("ABC-2.json.gz"));
+        assertFalse(fileNames.contains("CDE-1.json.gz"));
+    }
+
+    @Test
+    public void shouldGiveEmptyListWhenOfflineConceptsFilesAreNotAvailableForFilter() throws Exception {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getOfflineConceptFileNames("offlineconcepts");
+        assertEquals(0, fileNames.size());
+    }
+
+    @Test
+    public void shouldNotThrowExceptionIfBaseDirectoryIsNotPresentForOfflineConcepts() throws Exception {
+        FileUtils.cleanDirectory(new File("./offline-concepts"));
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn("./patient/not/present");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getOfflineConceptFileNames("ABC");
+        assertEquals(0, fileNames.size());
+    }
+
+    @Test
+    public void shouldThrowAPIExceptionWhenOfflineConceptsFileIsNotAvailable() {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        thrown.expect(APIException.class);
+        thrown.expectMessage("File [ABCD.json.gz] is not available at [./offline-concepts]");
+
+        controller.getOfflineConceptsByFilter(httpServletResponse, "ABCD.json.gz");
+    }
+
+    @Test
+    public void shouldThrowAPIExceptionWhenFileIsPresentButUnableToParseTheContentForOfflineConcepts() throws Exception {
+        PowerMockito.mockStatic(IOUtils.class);
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        when(resourceLoader.getResource("file:./offline-concepts/offline-concepts.json.gz")).thenReturn(new FileSystemResource(resultOfflineConceptFile));
+        when(IOUtils.copy(any(InputStream.class), any(OutputStream.class))).thenThrow(new IOException());
+
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        controller.setResourceLoader(resourceLoader);
+
+        thrown.expect(APIException.class);
+        thrown.expectMessage("Cannot parse the offline-concepts file at location [./offline-concepts/offline-concepts.json.gz]");
+
+        controller.getOfflineConceptsByFilter(httpServletResponse, "offline-concepts.json.gz");
+
+    }
+
+    @Test
+    public void shouldRetrieveCompressedAddressHierarchyFileFromPredefinedLocation() throws Exception{
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        when(resourceLoader.getResource("file:./addressHierarchy/addressHierarchy.json.gz")).thenReturn(new FileSystemResource(resultAddressHierarchyFile));
+
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        controller.setResourceLoader(resourceLoader);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        controller.getAddressHierarchyByFilter(response, "addressHierarchy.json.gz");
+
+        assertEquals("blah..blah..blah..", response.getContentAsString());
+        assertEquals("application/json", response.getContentType());
+        assertEquals("UTF-8", response.getCharacterEncoding());
+        assertEquals("gzip", response.getHeader("Content-Encoding"));
+    }
+
+    @Test
+    public void shouldGiveAllAddressHierarchyFileNamesStartedWithGivenFilterSortByLastModifiedTime() throws Exception {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        (new File("./addressHierarchy/ABC-1.json.gz")).createNewFile();
+        (new File("./addressHierarchy/CDE-1.json.gz")).createNewFile();
+        (new File("./addressHierarchy/ABC-2.json.gz")).createNewFile();
+
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getAddressHierarchyFileNames("ABC");
+        assertEquals(2, fileNames.size());
+        assertTrue(fileNames.contains("ABC-1.json.gz"));
+        assertTrue(fileNames.contains("ABC-2.json.gz"));
+        assertFalse(fileNames.contains("CDE-1.json.gz"));
+    }
+
+    @Test
+    public void shouldGiveEmptyListWhenAddressHierarchyFilesAreNotAvailableForFilter() throws Exception {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getAddressHierarchyFileNames("addressHierarchy");
+        assertEquals(0, fileNames.size());
+    }
+
+    @Test
+    public void shouldNotThrowExceptionIfBaseDirectoryIsNotPresentForAddressHierarchy() throws Exception {
+        FileUtils.cleanDirectory(new File("./addressHierarchy"));
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn("./patient/not/present");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        ArrayList<String> fileNames = controller.getAddressHierarchyFileNames("ABC");
+        assertEquals(0, fileNames.size());
+    }
+
+    @Test
+    public void shouldThrowAPIExceptionWhenAddressHierarchyFileIsNotAvailable() {
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        thrown.expect(APIException.class);
+        thrown.expectMessage("File [ABCD.json.gz] is not available at [./addressHierarchy]");
+
+        controller.getAddressHierarchyByFilter(httpServletResponse, "ABCD.json.gz");
+    }
+
+    @Test
+    public void shouldThrowAPIExceptionWhenFileIsPresentButUnableToParseTheContentForAddressHierarchy() throws Exception {
+        PowerMockito.mockStatic(IOUtils.class);
+        when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
+        when(resourceLoader.getResource("file:./offline-concepts/offline-concepts.json.gz")).thenReturn(new FileSystemResource(resultOfflineConceptFile));
+        when(IOUtils.copy(any(InputStream.class), any(OutputStream.class))).thenThrow(new IOException());
+
+        InitialSyncArtifactController controller = new InitialSyncArtifactController();
+        controller.setResourceLoader(resourceLoader);
+
+        thrown.expect(APIException.class);
+        thrown.expectMessage("Cannot parse the offline-concepts file at location [./offline-concepts/offline-concepts.json.gz]");
+
+        controller.getOfflineConceptsByFilter(httpServletResponse, "offline-concepts.json.gz");
+
+    }
+
 }

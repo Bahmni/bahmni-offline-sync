@@ -34,6 +34,8 @@ public class PreProcessArtifactController {
         }
 
         InitialSyncArtifactsPublisher initialSyncArtifactsPublisher = new InitialSyncArtifactsPublisher();
+        initialSyncArtifactsPublisher.setUserName(username);
+        initialSyncArtifactsPublisher.setPassword(password);
         initialSyncArtifactsPublisher.execute();
     }
 }

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensitiveTest {
 
     private String directory = "src/test/resources/patient/";
+    private String offlineConceptsDirectory = "src/test/resources/offline-concepts";
 
     @BeforeClass
     public static void createSchema() throws Exception {
@@ -35,6 +36,7 @@ public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensiti
     @After
     public void tearDown() throws Exception {
         FileUtils.deleteQuietly(new File(directory));
+        FileUtils.deleteQuietly(new File(offlineConceptsDirectory));
     }
 
     @Test
@@ -53,6 +55,15 @@ public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensiti
         assertFalse(nullFile.exists());
         File emptyFile = new File(directory + "-1.json.gz");
         assertFalse(emptyFile.exists());
+
+        File offline_concepts = new File(offlineConceptsDirectory + "offline-concepts-1.json.gz");
+        assertTrue(offline_concepts.exists());
+
+        JSONObject offlineConcepts_1 = unzip(ganFile_1);
+        JSONArray offlineConcepts_1_Array = (JSONArray) offlineConcepts_1.get("offlineconcepts");
+        assertEquals(1, (offlineConcepts_1_Array).length());
+        assertEquals("6f0762d6-3b38-11ea-b6b4-6c2b598065d8", offlineConcepts_1.get("lastReadEventUuid"));
+        assertEquals("47f8952e-3b38-11ea-a342-6c2b598065d8", ((JSONObject) offlineConcepts_1_Array.get(0)).getString("uuid"));
 
         JSONObject ganList_1 = unzip(ganFile_1);
         JSONArray ganPatients_1 = (JSONArray) ganList_1.get("patients");

@@ -47,7 +47,6 @@ public class AddressHierarchyTransformer implements RowTransformer {
                 sbr.append("}");
                 SimpleObject simpleObject = new SimpleObject();
                 simpleObject.add("address",  SimpleObject.parseJson(sbr.toString()));
-                //log.error("converted response ->" + simpleObject.get("address"));
                 return simpleObject.get("address");
             }
             else

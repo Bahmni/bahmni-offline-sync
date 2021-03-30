@@ -38,7 +38,7 @@
         <addressHierarchyVersion>2.9</addressHierarchyVersion>
         <springVersion>4.1.4.RELEASE</springVersion>
         <openMRSWebServicesVersion>2.16</openMRSWebServicesVersion>
-        <junitVersion>4.12</junitVersion>
+        <junitVersion>4.13.1</junitVersion>
         <powerMockVersion>1.6.5</powerMockVersion>
         <emrapi-omod.version>1.20</emrapi-omod.version>
         <bahmni.ie.apps>1.1.0</bahmni.ie.apps>

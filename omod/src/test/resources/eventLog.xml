@@ -88,4 +88,24 @@
     <patient_identifier patient_identifier_id="5" patient_id="5" identifier="563422" identifier_type="1" preferred="1"
                         location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
                         uuid="f4798e60-b9ef-47d8-afa7-54a1dc9e27c1"/>
+
+    <event_log id="9" timestamp="2020-01-20 09:23:19" filter=""
+               object="/concept/47f89369-3b38-11ea-a342-6c2b598065d8?s=byFullySpecifiedName&amp;v=bahmni&amp;name=AP,+HPV+Pos-VIAC+Pos+Other+(Specify+date)+Date"
+               category="offline-concepts"
+               uuid="6f0762d6-3b38-11ea-b6b4-6c2b598065d8"/>
+
+    <concept concept_id="9079" retired="0" class_id="11" datatype_id="6" creator="1" date_created="2005-01-01 00:00:00.0"
+             is_set="0" uuid="47f8952e-3b38-11ea-a342-6c2b598065d8"/>
+
+    <concept_name concept_name_id="45456" concept_id="9079" name="If Other, Specify Date" locale="en" locale_preferred="0" creator="1" date_created="2020-01-20 05:52:29"
+                  concept_name_type="SHORT" voided="0" uuid="47f8952e-3b38-11ea-a342-6c2b598065d8"/>
+    <concept_name concept_name_id="45457" concept_id="9079" name="AP, HPV Pos-VIAC Pos Other (Specify date) Date" locale="en" locale_preferred="1" creator="1" date_created="2020-01-20 05:52:29"
+                  concept_name_type="FULLY_SPECIFIED" voided="0" uuid="47f8952e-3b38-11ea-a342-6c2b598065d9"/>
+
+    <concept_datatype concept_datatype_id="6" name="Date" hl7_Abbreviation="DT" description="Absolute date" creator="1" date_created="2004-07-22 00:00:00"
+                  retired="false"  uuid="8d4a505e-c2cc-11de-8d13-0010c6dffd0f"/>
+
+    <concept_class concept_class_id="11" name="Misc" description="Terms which don't fit other categories" creator="1" date_created="2004-03-02 00:00:00"
+                   retired="false" uuid="8d492774-c2cc-11de-8d13-0010c6dffd0f"/>
+
 </dataset>

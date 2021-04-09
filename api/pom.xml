@@ -89,6 +89,11 @@
 			<version>${bahmni.ie.apps}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>addresshierarchy-api</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 

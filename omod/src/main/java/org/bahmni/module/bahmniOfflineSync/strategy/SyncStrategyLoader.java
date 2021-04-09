@@ -26,4 +26,16 @@ public class SyncStrategyLoader {
             log.error("Global Property " + syncStrategyProp + " is not configured in OpenMRS. Configure classpath for OfflineSyncStrategy");
         return null;
     }
+
+    public String getKeyValueFromGlobalProperties(String key)  {
+
+        String valueForKey = administrationService.getGlobalProperty(key);
+        if (valueForKey != null && !valueForKey.isEmpty()) {
+            log.error("key value is ->" + valueForKey);
+            return valueForKey;
+        }
+        else{
+            log.error("Global Property " + key + " is not configured in OpenMRS. ");
+        return null;}
+    }
 }

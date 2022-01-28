@@ -1,8 +1,7 @@
 package org.bahmni.module.bahmniOfflineSync.strategy;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 import org.bahmni.module.bahmniOfflineSync.eventLog.EventLog;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -26,7 +25,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class IDBasedSyncStrategy extends AbstractOfflineSyncStrategy {
-    private static Logger logger = LogManager.getLogger(IDBasedSyncStrategy.class);
+    private static Logger logger = Logger.getLogger(IDBasedSyncStrategy.class);
 
     private LocationService locationService;
 

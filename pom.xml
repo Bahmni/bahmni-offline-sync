@@ -30,9 +30,9 @@
     </modules>
 
     <properties>
-        <openMRSVersion>2.1.5</openMRSVersion>
-        <atomfeed.version>1.10.0-SNAPSHOT</atomfeed.version>
-        <openmrsAtomfeedVersion>2.5.7-SNAPSHOT</openmrsAtomfeedVersion>
+        <openMRSVersion>2.1.6</openMRSVersion>
+        <atomfeed.version>1.10.0</atomfeed.version>
+        <openmrsAtomfeedVersion>2.6.0</openmrsAtomfeedVersion>
         <serializationXstreamModuleVersion>0.2.12</serializationXstreamModuleVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <addressHierarchyVersion>2.9</addressHierarchyVersion>

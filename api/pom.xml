@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>org.ict4h</groupId>
 			<artifactId>atomfeed-commons</artifactId>
-			<version>1.10.0-SNAPSHOT</version>
+			<version>${atomfeed.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

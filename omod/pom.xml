@@ -13,6 +13,10 @@
 	<name>Bahmni Offline Sync Module OMOD</name>
 	<description>OMOD project for BahmniOfflineSync</description>
 
+	<properties>
+		<log4jVersion>2.17.1</log4jVersion>
+	</properties>
+
 	<dependencies>
 
 		<!-- Begin OpenMRS modules -->
@@ -174,6 +178,20 @@
 			<artifactId>org.json</artifactId>
 			<version>20150729</version>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- Log4j-->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4jVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4jVersion}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

@@ -3,7 +3,8 @@ package org.bahmni.module.bahmniOfflineSync.service;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bahmni.module.bahmniOfflineSync.utils.ConfigDirectory;
 
 import java.io.File;
@@ -13,7 +14,7 @@ import java.io.InputStream;
 
 public class BahmniRegistrationConfig {
 
-    private static final Logger log = Logger.getLogger(BahmniRegistrationConfig.class);
+    private static final Logger log = LogManager.getLogger(BahmniRegistrationConfig.class);
 
     private ConfigDirectory configDirectory;
 

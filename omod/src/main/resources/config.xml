@@ -46,7 +46,7 @@
 	</advice>
 
 	<advice>
-		<point>org.openmrs.module.bahmni.ie.apps.service.BahmniFormService</point>
+		<point>org.bahmni.module.bahmni.ie.apps.service.BahmniFormService</point>
 		<class>org.bahmni.module.bahmniOfflineSync.advice.BahmniFormServiceInterceptor</class>
 	</advice>
 

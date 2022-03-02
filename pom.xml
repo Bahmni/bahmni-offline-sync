@@ -30,9 +30,9 @@
     </modules>
 
     <properties>
-        <openMRSVersion>2.0.3</openMRSVersion>
-        <atomfeed.version>1.9.3</atomfeed.version>
-        <openmrsAtomfeedVersion>2.5.6</openmrsAtomfeedVersion>
+        <openMRSVersion>2.1.6</openMRSVersion>
+        <atomfeed.version>1.10.1</atomfeed.version>
+        <openmrsAtomfeedVersion>2.6.1</openmrsAtomfeedVersion>
         <serializationXstreamModuleVersion>0.2.12</serializationXstreamModuleVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <addressHierarchyVersion>2.9</addressHierarchyVersion>
@@ -41,7 +41,7 @@
         <junitVersion>4.12</junitVersion>
         <powerMockVersion>1.6.5</powerMockVersion>
         <emrapi-omod.version>1.20</emrapi-omod.version>
-        <bahmni.ie.apps>1.1.0</bahmni.ie.apps>
+        <bahmni.ie.apps>1.2.0-SNAPSHOT</bahmni.ie.apps>
     </properties>
 
     <dependencyManagement>
@@ -302,12 +302,12 @@
         <repository>
             <id>openmrs-repo</id>
             <name>OpenMRS Nexus Repository</name>
-            <url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+            <url>https://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
         </repository>
         <repository>
             <id>spring-maven-release</id>
             <name>Spring Maven Release Repository</name>
-            <url>http://maven.springframework.org/release</url>
+            <url>https://maven.springframework.org/release</url>
             <releases>
                 <updatePolicy>interval:10080</updatePolicy>
             </releases>
@@ -315,7 +315,7 @@
         <repository>
             <id>spring-repo</id>
             <name>Spring Maven Repository</name>
-            <url>http://maven.springframework.org/milestone</url>
+            <url>https://maven.springframework.org/milestone</url>
             <releases>
                 <updatePolicy>interval:10080</updatePolicy>
             </releases>
@@ -334,7 +334,7 @@
        <repository>
           <id>repo.mybahmni.org-release</id>
           <name>bahmni-artifactory-release</name>
-          <url>http://repo.mybahmni.org.s3.amazonaws.com/artifactory/snapshot</url>
+          <url>https://repo.mybahmni.org.s3.amazonaws.com/artifactory/snapshot</url>
       </repository>
     </repositories>
 
@@ -342,7 +342,7 @@
         <pluginRepository>
             <id>openmrs-repo</id>
             <name>OpenMRS Nexus Repository</name>
-            <url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+            <url>https://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>

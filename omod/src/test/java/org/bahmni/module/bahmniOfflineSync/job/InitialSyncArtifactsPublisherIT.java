@@ -10,9 +10,9 @@ import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
-import static org.h2.engine.Constants.UTF8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,7 +24,7 @@ public class InitialSyncArtifactsPublisherIT extends BaseModuleWebContextSensiti
     @BeforeClass
     public static void createSchema() throws Exception {
         RunScript.execute("jdbc:h2:mem:openmrs;DB_CLOSE_DELAY=-1",
-                "sa", "", "classpath:schema.sql", UTF8, false);
+                "sa", "", "classpath:schema.sql", StandardCharsets.UTF_8, false);
     }
 
     @Before

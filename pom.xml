@@ -30,16 +30,17 @@
     </modules>
 
     <properties>
-        <openMRSVersion>2.1.6</openMRSVersion>
+        <openMRSVersion>2.4.2</openMRSVersion>
         <atomfeed.version>1.10.1</atomfeed.version>
         <openmrsAtomfeedVersion>2.6.1</openmrsAtomfeedVersion>
         <serializationXstreamModuleVersion>0.2.12</serializationXstreamModuleVersion>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <addressHierarchyVersion>2.9</addressHierarchyVersion>
-        <springVersion>4.1.4.RELEASE</springVersion>
-        <openMRSWebServicesVersion>2.17</openMRSWebServicesVersion>
-        <junitVersion>4.12</junitVersion>
-        <powerMockVersion>1.6.5</powerMockVersion>
+        <springVersion>5.2.9.RELEASE</springVersion>
+        <openMRSWebServicesVersion>2.29.0</openMRSWebServicesVersion>
+        <junitVersion>4.13</junitVersion>
+        <powerMockVersion>2.0.7</powerMockVersion>
+        <mockitoVersion>3.5.11</mockitoVersion>
         <emrapi-omod.version>1.22.1</emrapi-omod.version>
         <bahmni.ie.apps>1.2.0-SNAPSHOT</bahmni.ie.apps>
         <metadatamapping.version>1.3.2</metadatamapping.version>
@@ -62,7 +63,7 @@
             </dependency>
             <dependency>
                 <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
+                <artifactId>powermock-api-mockito2</artifactId>
                 <version>${powerMockVersion}</version>
                 <scope>test</scope>
             </dependency>

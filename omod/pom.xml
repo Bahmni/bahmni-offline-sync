@@ -16,6 +16,9 @@
 	<properties>
 		<log4jVersion>2.17.1</log4jVersion>
 		<javaxServletVersion>4.0.1</javaxServletVersion>
+		<providerManagementVersion>2.13.0</providerManagementVersion>
+		<legacyUIVersion>1.8.0</legacyUIVersion>
+		<reportingOmodVersion>1.21.0</reportingOmodVersion>
 	</properties>
 
 	<dependencies>
@@ -108,13 +111,13 @@
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>reporting-api</artifactId>
-			<version>0.10.4</version>
+			<version>${reportingOmodVersion}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>reporting-api-2.0</artifactId>
-			<version>0.10.4</version>
+			<version>${reportingOmodVersion}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -126,7 +129,7 @@
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>reporting-omod</artifactId>
-			<version>0.10.4</version>
+			<version>${reportingOmodVersion}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -158,13 +161,13 @@
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>legacyui-omod</artifactId>
-			<version>1.3.2</version>
+			<version>${legacyUIVersion}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>providermanagement-api</artifactId>
-			<version>2.5.0</version>
+			<version>${providerManagementVersion}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -124,13 +125,12 @@ public class InitialSyncArtifactControllerTest {
         controller.getPatientsByFilter(httpServletResponse, "ABCD.json.gz");
     }
 
-    @Ignore
     @Test
     public void shouldThrowAPIExceptionWhenFileIsPresentButUnableToParseTheContent() throws Exception {
         PowerMockito.mockStatic(IOUtils.class);
         when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         when(resourceLoader.getResource("file:./patient/ABC.json.gz")).thenReturn(new FileSystemResource(resultFile));
-        when(IOUtils.copy(any(InputStream.class), any(OutputStream.class))).thenThrow(new IOException());
+        when(IOUtils.copy(any(InputStream.class), (OutputStream) eq(null))).thenThrow(new IOException());
 
         InitialSyncArtifactController controller = new InitialSyncArtifactController();
         controller.setResourceLoader(resourceLoader);

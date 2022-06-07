@@ -38,7 +38,6 @@
         <openMRSWebServicesVersion>2.29.0</openMRSWebServicesVersion>
         <junitVersion>4.13</junitVersion>
         <powerMockVersion>2.0.7</powerMockVersion>
-        <mockitoVersion>3.5.11</mockitoVersion>
         <emrapi-omod.version>1.32.0</emrapi-omod.version>
         <idgen.version>4.6.0</idgen.version>
         <bahmni.ie.apps>1.2.0-SNAPSHOT</bahmni.ie.apps>

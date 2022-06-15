@@ -136,7 +136,7 @@ public class InitialSyncArtifactsPublisher extends AbstractTask {
     }
 
     private String getSql(Integer lastEventId, String filter) {
-        String template = "SELECT object, uuid FROM event_log WHERE filter = '%s' and id <= %d and category = 'patient' GROUP BY object";
+        String template = "SELECT object, uuid FROM event_log WHERE filter = '%s' and id <= %d and category = 'patient' GROUP BY object order by id";
         return String.format(template, filter, lastEventId);
     }
 

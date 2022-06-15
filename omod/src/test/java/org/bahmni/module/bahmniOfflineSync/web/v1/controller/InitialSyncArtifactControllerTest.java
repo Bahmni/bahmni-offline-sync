@@ -13,6 +13,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.FileSystemResource;
@@ -27,12 +28,14 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @PrepareForTest({Context.class, IOUtils.class})
 @RunWith(PowerMockRunner.class)
+@PowerMockIgnore("javax.management.*")
 public class InitialSyncArtifactControllerTest {
     @Mock
     AdministrationService administrationService;
@@ -126,7 +129,7 @@ public class InitialSyncArtifactControllerTest {
         PowerMockito.mockStatic(IOUtils.class);
         when(administrationService.getGlobalProperty(InitialSyncArtifactController.GP_BAHMNICONNECT_INIT_SYNC_PATH, InitialSyncArtifactController.DEFAULT_INIT_SYNC_PATH)).thenReturn(".");
         when(resourceLoader.getResource("file:./patient/ABC.json.gz")).thenReturn(new FileSystemResource(resultFile));
-        when(IOUtils.copy(any(InputStream.class), any(OutputStream.class))).thenThrow(new IOException());
+        when(IOUtils.copy(any(InputStream.class), (OutputStream) eq(null))).thenThrow(new IOException());
 
         InitialSyncArtifactController controller = new InitialSyncArtifactController();
         controller.setResourceLoader(resourceLoader);

@@ -1,0 +1,29 @@
+name: Build and Publish bahmni-offline-sync
+on:
+  push:
+    branches:
+      - master
+      - BAH-2334
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build-bahmni-offlinesync:
+    name: Build bahmni-offlinesync
+    runs-on: ubuntu-latest
+    steps:
+      -  uses: actions/checkout@v2
+      - name: Setup Java 8
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'      
+      - run: mvn clean install -U -PIT
+      - name: Rename the omod
+        run: mv omod/target/bahmniOfflineSync*.omod omod/target/bahmniOfflineSync.omod
+      - name: Upload bahmniOfflineSync as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: bahmni-offline-sync
+          path: | 
+            omod/target/bahmniOfflineSync.omod

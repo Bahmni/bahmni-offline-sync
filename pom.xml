@@ -11,7 +11,12 @@
         obselete.
     </description>
     <url>https://wiki.openmrs.org/display/docs/Bahmni+Offline+Sync+Module+Module</url>
-
+    <licenses>
+        <license>
+            <name>Mozilla Public License Version 2.0</name>
+            <url>https://www.bahmni.org/license/mplv2hd</url>
+        </license>
+    </licenses>
     <organization>
         <name>OpenMRS</name>
         <url>http://openmrs.org</url>

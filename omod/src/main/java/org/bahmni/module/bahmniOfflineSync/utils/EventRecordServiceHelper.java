@@ -128,7 +128,7 @@ public class EventRecordServiceHelper {
 
     private AtomFeedSpringTransactionManager getTransactionManager() {
         if (atomFeedSpringTransactionManager == null) {
-            synchronized (AtomFeedSpringTransactionManager .class) {
+            synchronized (AtomFeedSpringTransactionManager.class) {
                 if (atomFeedSpringTransactionManager == null) {
                     atomFeedSpringTransactionManager = createTransactionManager();
                 }

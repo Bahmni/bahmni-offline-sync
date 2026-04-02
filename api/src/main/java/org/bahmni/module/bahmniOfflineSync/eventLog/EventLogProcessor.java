@@ -33,14 +33,16 @@ public class EventLogProcessor {
 
     public void process(List<SimpleObject> urls, PatientProfileWriter patientProfileWriter) {
         try {
+            boolean gotData = false;
             for (int index = 0; index < urls.size(); index++) {
                 SimpleObject event = urls.get(index);
                 SimpleObject simpleObject = rowTransformer.transform(event.get("object"));
                 if (simpleObject != null) {
-                    if (index != 0) {
+                    if (gotData && index != 0) {
                         patientProfileWriter.append(",");
                     }
                     patientProfileWriter.write(simpleObject);
+                    gotData = true;
                 }
             }
         } catch (IOException e) {

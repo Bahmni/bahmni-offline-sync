@@ -4,7 +4,7 @@
 
     <groupId>org.bahmni.module</groupId>
     <artifactId>bahmniOfflineSync</artifactId>
-    <version>0.92-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>Bahmni Offline Sync Module</name>
     <description>Workarounds for offline sync until concept attributes is developed. This module will then become
